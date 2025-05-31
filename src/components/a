@@ -1,0 +1,348 @@
+// import React from "react";
+
+// const COLORS = {
+//   master: "#AEDFF7",
+//   guest: "#D5F5E3",
+//   toilet: "#FADBD8",
+//   garden: "#A9DFBF",
+//   bike: "#F9E79F",
+//   car: "#D6DBDF",
+//   gate: "#F5CBA7",
+// };
+
+// const LayoutPreview = ({ data }) => {
+//   const plotWidthFt = Number(data.width) || 60;
+//   const plotLengthFt = Number(data.length) || 40;
+//   const scale = Math.min((window.innerWidth - 80) / plotWidthFt, 12); // scale: px/ft
+//   const toPx = (ft) => ft * scale;
+
+//   const margin = 10;
+//   const svgWidth = toPx(plotWidthFt) + 2 * margin;
+//   const svgHeight = toPx(plotLengthFt) + 2 * margin;
+
+//   const elements = [];
+
+//   const addRoom = (x, y, w, h, type, label) => {
+//     elements.push({
+//       x: toPx(x) + margin,
+//       y: toPx(y) + margin,
+//       width: toPx(w),
+//       height: toPx(h),
+//       fill: COLORS[type] || "#ccc",
+//       label,
+//     });
+//   };
+
+//   // Sample: Master Room with attached toilet
+//   const masterCount = Number(data.masterRooms) || 1;
+//   for (let i = 0; i < masterCount; i++) {
+//     const x = 5 + (i % 2) * 30;
+//     const y = 5 + Math.floor(i / 2) * 25;
+//     addRoom(x, y, 20, 15, "master", `Master ${i + 1}`);
+//     addRoom(x + 20, y, 5, 6, "toilet", "Toilet");
+//   }
+
+//   // Guest Rooms
+//   const guestCount = Number(data.guestRooms) || 1;
+//   for (let i = 0; i < guestCount; i++) {
+//     const x = 5 + (i % 2) * 30;
+//     const y = 40 + Math.floor(i / 2) * 25;
+//     addRoom(x, y, 18, 12, "guest", `Guest ${i + 1}`);
+//     addRoom(x + 18, y, 4, 5, "toilet", "Toilet");
+//   }
+
+//   // Garden
+//   addRoom(plotWidthFt - 22, 5, 20, 12, "garden", "Garden");
+
+//   // Parking
+//   const carCount = Number(data.estimatedFourWheeler) || 2;
+//   const bikeCount = Number(data.estimatedTwoWheeler) || 4;
+//   const parkingStartY = plotLengthFt - 18;
+//   for (let i = 0; i < carCount; i++) {
+//     addRoom(5 + i * 14, parkingStartY, 12, 18, "car", "Car");
+//   }
+//   for (let i = 0; i < bikeCount; i++) {
+//     addRoom(5 + i * 7, parkingStartY - 12, 5, 10, "bike", "Bike");
+//   }
+
+//   // Gate
+//   addRoom((plotWidthFt - 20) / 2, plotLengthFt - 5, 20, 5, "gate", "Gate");
+
+//   return (
+//     <div style={{ textAlign: "center", margin: "20px" }}>
+//       <h2 className="text-xl font-bold mb-2">2D Layout Preview</h2>
+//       <svg width={svgWidth} height={svgHeight} style={{ border: "2px solid #444", background: "#fff" }}>
+//         {/* Plot boundary */}
+//         <rect
+//           x={margin}
+//           y={margin}
+//           width={toPx(plotWidthFt)}
+//           height={toPx(plotLengthFt)}
+//           fill="none"
+//           stroke="#333"
+//           strokeWidth={2}
+//         />
+//         {/* Rooms */}
+//         {elements.map((el, idx) => (
+//           <g key={idx}>
+//             <rect
+//               x={el.x}
+//               y={el.y}
+//               width={el.width}
+//               height={el.height}
+//               fill={el.fill}
+//               stroke="#000"
+//               strokeWidth={1}
+//               rx={4}
+//               ry={4}
+//             />
+//             <text
+//               x={el.x + el.width / 2}
+//               y={el.y + el.height / 2}
+//               fontSize={12}
+//               fill="#000"
+//               textAnchor="middle"
+//               alignmentBaseline="middle"
+//               style={{ pointerEvents: "none" }}
+//             >
+//               {el.label}
+//             </text>
+//           </g>
+//         ))}
+//       </svg>
+
+//       {/* Legend */}
+//       <div className="mt-4 inline-block text-left bg-white shadow p-3 rounded border border-gray-300">
+//         <h3 className="font-semibold mb-2">Legend</h3>
+//         <ul className="text-sm">
+//           {Object.entries(COLORS).map(([key, color]) => (
+//             <li key={key} className="flex items-center gap-2 mb-1">
+//               <div
+//                 style={{
+//                   width: 16,
+//                   height: 16,
+//                   backgroundColor: color,
+//                   border: "1px solid #333",
+//                   display: "inline-block",
+//                 }}
+//               />
+//               <span className="capitalize">{key}</span>
+//             </li>
+//           ))}
+//         </ul>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default LayoutPreview;
+import React, { useRef, useEffect, useState } from "react";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
+import { ZoomIn, ZoomOut, Download, ImageDown, Crosshair } from "lucide-react";
+
+const STANDARD_SIZES = {
+  masterBedroom: { minWidth: 15, minLength: 18 },
+  bedroom: { minWidth: 12, minLength: 15 },
+  kitchen: { minWidth: 10, minLength: 12 },
+  bathroom: { minWidth: 8, minLength: 10 },
+  toilet: { minWidth: 6, minLength: 8 },
+  livingRoom: { minWidth: 20, minLength: 25 },
+  diningRoom: { minWidth: 15, minLength: 18 },
+  corridor: { minWidth: 6, minLength: 0 },
+  parking2Wheeler: { width: 5, length: 10 },
+  parking4Wheeler: { width: 12, length: 24 },
+  garden: { minWidth: 20, minLength: 20 }
+};
+
+const COLORS = {
+  master: "#aed581",
+  guest: "#90caf9",
+  kitchen: "#ffcc80",
+  bathroom: "#80deea",
+  toilet: "#4db6ac",
+  living: "#ffccbc",
+  dining: "#ffab91",
+  parking: "#e0e0e0",
+  car: "#bdbdbd",
+  bike: "#9e9e9e",
+  corridor: "#f5f5f5",
+  gate: "#795548",
+  garden: "#c8e6c9",
+  utility: "#b39ddb"
+};
+
+const LayoutPreview = ({ data }) => {
+  const svgRef = useRef(null);
+  const containerRef = useRef(null);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    setZoom((z) => Math.max(0.5, Math.min(3, z - e.deltaY * 0.001)));
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const exportPNG = async () => {
+    const canvas = await html2canvas(containerRef.current);
+    canvas.toBlob((blob) => saveAs(blob, "layout.png"));
+  };
+
+  const exportSVG = () => {
+    const svg = svgRef.current.outerHTML;
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "layout.svg");
+  };
+
+  const plotWidthFt = Number(data.width) || 60;
+  const plotLengthFt = Number(data.length) || 40;
+  const scale = 10;
+  const toPx = (ft) => ft * scale;
+  const margin = 50;
+
+  const elements = [];
+
+  const addRoom = (x, y, w, h, type, label) => {
+    elements.push({
+      x: toPx(x) + margin,
+      y: toPx(y) + margin,
+      width: toPx(w),
+      height: toPx(h),
+      fill: COLORS[type] || "#ccc",
+      label,
+    });
+  };
+
+  const masterCount = Number(data.masterRooms) || 1;
+  for (let i = 0; i < masterCount; i++) {
+    const x = 5 + (i % 2) * 30;
+    const y = 5 + Math.floor(i / 2) * 25;
+    addRoom(x, y, 20, 15, "master", `Master ${i + 1}`);
+    addRoom(x + 20, y, 5, 6, "toilet", "Toilet");
+  }
+
+  const guestCount = Number(data.guestRooms) || 1;
+  for (let i = 0; i < guestCount; i++) {
+    const x = 5 + (i % 2) * 30;
+    const y = 40 + Math.floor(i / 2) * 25;
+    addRoom(x, y, 18, 12, "guest", `Guest ${i + 1}`);
+    addRoom(x + 18, y, 4, 5, "toilet", "Toilet");
+  }
+
+  addRoom(5, 70, 12, 10, "kitchen", "Kitchen");
+  addRoom(20, 70, 25, 20, "living", "Living Room");
+  addRoom(47, 70, 18, 15, "dining", "Dining");
+  addRoom(5, 82, 10, 8, "bathroom", "Bathroom");
+  addRoom(16, 82, 10, 8, "utility", "Utility");
+  addRoom(5, 95, 60, 5, "corridor", "Corridor");
+  addRoom(plotWidthFt - 22, 5, 20, 12, "garden", "Garden");
+
+  const carCount = Number(data.estimatedFourWheeler) || 2;
+  const bikeCount = Number(data.estimatedTwoWheeler) || 4;
+  const parkingStartY = plotLengthFt - 18;
+  for (let i = 0; i < carCount; i++) {
+    addRoom(5 + i * 14, parkingStartY, 12, 18, "car", "Car");
+  }
+  for (let i = 0; i < bikeCount; i++) {
+    addRoom(5 + i * 7, parkingStartY - 12, 5, 10, "bike", "Bike");
+  }
+
+  addRoom((plotWidthFt - 20) / 2, plotLengthFt - 5, 20, 5, "gate", "Gate");
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        overflow: "hidden",
+        width: "100%",
+        height: "90vh",
+        position: "relative",
+        border: "2px solid #333"
+      }}
+    >
+      <svg
+        ref={svgRef}
+        width="2000"
+        height="2000"
+        style={{
+          transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+          transformOrigin: "0 0",
+          backgroundColor: "#f0f0f0"
+        }}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        {[...Array(100)].map((_, i) => (
+          <line key={`h${i}`} x1="0" y1={i * 20} x2="2000" y2={i * 20} stroke="#ddd" />
+        ))}
+        {[...Array(100)].map((_, i) => (
+          <line key={`v${i}`} x1={i * 20} y1="0" x2={i * 20} y2="2000" stroke="#ddd" />
+        ))}
+
+        <text x="20" y="40" fill="black" fontSize="18">N</text>
+        <line x1="25" y1="50" x2="25" y2="70" stroke="black" strokeWidth="2" />
+
+        {elements.map((el, idx) => (
+          <g key={idx}>
+            <rect
+              x={el.x}
+              y={el.y}
+              width={el.width}
+              height={el.height}
+              fill={el.fill}
+              stroke="#333"
+              strokeWidth={1.5}
+              rx={4}
+              ry={4}
+            />
+            {el.label && (
+              <text
+                x={el.x + el.width / 2}
+                y={el.y + el.height / 2}
+                fill="#222"
+                fontSize="12"
+                fontWeight="bold"
+                textAnchor="middle"
+                alignmentBaseline="middle"
+              >
+                {el.label}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+
+      <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 10 }}>
+        <button onClick={exportPNG}><ImageDown size={18} /></button>
+        <button onClick={exportSVG}><Download size={18} /></button>
+        <button onClick={() => setZoom((z) => Math.min(3, z + 0.1))}><ZoomIn size={18} /></button>
+        <button onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}><ZoomOut size={18} /></button>
+        <button onClick={() => setOffset({ x: 0, y: 0 })}><Crosshair size={18} /></button>
+      </div>
+    </div>
+  );
+};
+
+export default LayoutPreview;

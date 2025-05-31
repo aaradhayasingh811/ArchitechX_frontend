@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.measurement-label {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #333;
+  pointer-events: none;
+}
+
+
+.architecture-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.toolbar {
+  padding: 10px;
+  background: #f0f0f0;
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.toolbar button.active {
+  background: #007bff;
+  color: white;
+}
+
+.canvas-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
