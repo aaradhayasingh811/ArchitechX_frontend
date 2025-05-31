@@ -82,25 +82,9 @@ ArchitechX is a comprehensive web application for architectural design that enab
 
 ---
 
+## Authentication flow
+![alt text](<Screenshot 2025-05-31 143049.png>)
 
-
-## 🤝 Contributing
-
-1. Fork the project
-
-2. Create a new branch (git checkout -b feature/your-feature)
-
-3. Commit your changes (git commit -m 'Add feature')
-
-4. Push to the branch (git push origin feature/your-feature)
-
-5. Open a Pull Request
-
-Contributions are always welcome!
-
-See `contributing.md` for ways to get started.
-
-Please adhere to this project's `code of conduct`.
 
 
 ## Installation
@@ -128,6 +112,24 @@ To run this project, you will need to add the following environment variables to
 
 `ANOTHER_API_KEY`
 
+
+## 🤝 Contributing
+
+1. Fork the project
+
+2. Create a new branch (git checkout -b feature/your-feature)
+
+3. Commit your changes (git commit -m 'Add feature')
+
+4. Push to the branch (git push origin feature/your-feature)
+
+5. Open a Pull Request
+
+Contributions are always welcome!
+
+See `contributing.md` for ways to get started.
+
+Please adhere to this project's `code of conduct`.
 
 ## License
 
