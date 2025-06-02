@@ -3,8 +3,10 @@ import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
+import { toast } from 'react-toastify';
 
-const RECAPTCHA_SITE_KEY = "6LdRX0grAAAAAH3C0CSLgG1Ae2TJGYPy-FqYLmx-"; // Replace with your real site key
+const RECAPTCHA_SITE_KEY = "6LdRX0grAAAAAH3C0CSLgG1Ae2TJGYPy-FqYLmx-";
 
 const LoginForm = () => {
   const recaptchaRef = useRef();
@@ -25,10 +27,10 @@ const LoginForm = () => {
       ...prev,
       [name]: value,
     }));
-    
+
     // Clear error when user types
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -38,28 +40,28 @@ const LoginForm = () => {
       ...prev,
       captchaToken: value,
     }));
-    
+
     // Clear captcha error if exists
     if (errors.captcha) {
-      setErrors(prev => ({ ...prev, captcha: "" }));
+      setErrors((prev) => ({ ...prev, captcha: "" }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.emailOrUsername.trim()) {
       newErrors.emailOrUsername = "Email or username is required";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     }
-    
+
     if (!captchaVerified) {
       newErrors.captcha = "Please complete the CAPTCHA";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,26 +73,56 @@ const LoginForm = () => {
 
     console.log(formData);
 
-    // try {
-    //   setLoading(true);
-    //   const response = await axios.post("/api/login", formData);
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/api/v1/login`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
 
-    //   if (response.data.success) {
-    //     // Store token or user data as needed
-    //     navigate("/dashboard"); // Redirect to dashboard or home page
-    //   } else {
-    //     setErrors({
-    //       general: response.data.message || "Invalid credentials. Please try again."
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.error("Login error:", error);
-    //   setErrors({
-    //     general: "An error occurred. Please try again later."
-    //   });
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (response.data.success) {
+        // Store token or user data as needed
+        toast.success("Login successful!");
+        navigate("/dashboard"); // Redirect to dashboard or home page
+      } else {
+        setErrors({
+          general:
+            response.data.message || "Invalid credentials. Please try again.",
+        });
+      }
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.");
+      console.error("Login error:", error);
+      setErrors({
+        general: "An error occurred. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/api/v1/auth/google`,
+        { token },
+        { withCredentials: true }
+      );
+
+      if (res.data.token) {
+        navigate("/dashboard");
+      } else {
+        setErrors({ general: "Google sign-in failed. Try again." });
+      }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      setErrors({ general: "Google sign-in error. Please try again." });
+    }
   };
 
   return (
@@ -106,8 +138,16 @@ const LoginForm = () => {
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <svg
+                    className="h-5 w-5 text-red-500"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -119,7 +159,10 @@ const LoginForm = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="emailOrUsername"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email or Username
               </label>
               <input
@@ -130,15 +173,22 @@ const LoginForm = () => {
                 required
                 value={formData.emailOrUsername}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border ${errors.emailOrUsername ? 'border-red-500' : 'border-gray-300'} rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition`}
+                className={`w-full px-4 py-3 border ${
+                  errors.emailOrUsername ? "border-red-500" : "border-gray-300"
+                } rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition`}
               />
               {errors.emailOrUsername && (
-                <p className="mt-1 text-sm text-red-600">{errors.emailOrUsername}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.emailOrUsername}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
@@ -150,7 +200,9 @@ const LoginForm = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition pr-10`}
+                  className={`w-full px-4 py-3 border ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  } rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition pr-10`}
                 />
                 <button
                   type="button"
@@ -158,13 +210,38 @@ const LoginForm = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <svg
+                      className="h-5 w-5 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
                     </svg>
                   ) : (
-                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      className="h-5 w-5 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
@@ -180,12 +257,18 @@ const LoginForm = () => {
                     type="checkbox"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
                     Remember me
                   </label>
                 </div>
                 <div className="text-sm">
-                  <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                  <a
+                    href="/forgot-password"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -201,7 +284,9 @@ const LoginForm = () => {
                 />
               </div>
               {errors.captcha && (
-                <p className="mt-1 text-sm text-red-600 text-center">{errors.captcha}</p>
+                <p className="mt-1 text-sm text-red-600 text-center">
+                  {errors.captcha}
+                </p>
               )}
             </div>
 
@@ -212,9 +297,25 @@ const LoginForm = () => {
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/s" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/s"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Signing in...
                 </>
@@ -230,21 +331,19 @@ const LoginForm = () => {
             <div className="flex-grow h-px bg-gray-300" />
           </div>
 
-          <button
-            type="button"
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 text-sm font-medium rounded-lg hover:bg-gray-50 transition"
-          >
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-5 h-5"
+          <div className="mt-4 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setErrors({ general: "Google login failed" })}
             />
-            Sign in with Google
-          </button>
+          </div>
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition">
+            <a
+              href="/signup"
+              className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition"
+            >
               Sign up
             </a>
           </p>

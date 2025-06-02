@@ -5,12 +5,12 @@ import axios from "axios";
 import html2canvas from "html2canvas";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { 
-  FaSave, 
-  FaShare, 
-  FaImage, 
-  FaInfoCircle, 
-  FaTrash, 
+import {
+  FaSave,
+  FaShare,
+  FaImage,
+  FaInfoCircle,
+  FaTrash,
   FaMousePointer,
   FaPlus,
   FaCheck,
@@ -22,11 +22,11 @@ import {
   FaTv,
   FaBoxOpen,
   FaPalette,
-  FaProjectDiagram
+  FaProjectDiagram,
 } from "react-icons/fa";
 
-const API_URL = "http://localhost:3002/api/v1/create-layout";
-const SHARE_API_URL = "http://localhost:3005/api/v1/share-layout";
+const API_URL = `${import.meta.env.VITE_API_URL}/layout/api/v1/create-layout`;
+const SHARE_API_URL = `${import.meta.env.VITE_API_URL}/export/api/v1/share-layout`;
 
 const HouseLayoutEditor = ({ data, onSave }) => {
   const [layout, setLayout] = useState(null);
@@ -52,7 +52,9 @@ const HouseLayoutEditor = ({ data, onSave }) => {
   useEffect(() => {
     const fetchLayout = async () => {
       try {
-        const response = await axios.post(API_URL, data);
+        const response = await axios.post(API_URL, data, {
+          withCredentials:true
+        });
         const layoutData = response.data.layout;
         setLayout(layoutData);
 
@@ -203,16 +205,18 @@ const HouseLayoutEditor = ({ data, onSave }) => {
       scale: 2,
       logging: false,
       useCORS: true,
-    }).then((canvas) => {
-      const link = document.createElement("a");
-      link.download = `${projectName || "layout"}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      toast.success("Layout exported successfully!", { autoClose: 3000 });
-    }).catch(err => {
-      toast.error("Failed to export layout", { autoClose: 3000 });
-      console.error("Export error:", err);
-    });
+    })
+      .then((canvas) => {
+        const link = document.createElement("a");
+        link.download = `${projectName || "layout"}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        toast.success("Layout exported successfully!", { autoClose: 3000 });
+      })
+      .catch((err) => {
+        toast.error("Failed to export layout", { autoClose: 3000 });
+        console.error("Export error:", err);
+      });
   };
 
   const saveProject = async () => {
@@ -220,9 +224,9 @@ const HouseLayoutEditor = ({ data, onSave }) => {
       toast.warning("Please enter a project name");
       return;
     }
-    
+
     const toastId = toast.loading("Saving project...");
-    
+
     try {
       const payload = {
         name: projectName,
@@ -233,7 +237,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
       };
 
       const response = await axios.post(
-        "http://localhost:3002/api/v1/save-layout",
+        `${import.meta.env.VITE_API_URL}/layout/api/v1/save-layout`,
         payload,
         {
           headers: {
@@ -251,7 +255,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
         render: "Project saved successfully!",
         type: "success",
         isLoading: false,
-        autoClose: 3000
+        autoClose: 3000,
       });
       setIsEditingProjectInfo(false);
     } catch (err) {
@@ -260,7 +264,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
         render: "Error saving project. Please try again.",
         type: "error",
         isLoading: false,
-        autoClose: 3000
+        autoClose: 3000,
       });
     }
   };
@@ -283,38 +287,46 @@ const HouseLayoutEditor = ({ data, onSave }) => {
         useCORS: true,
       });
 
-      const imageData = canvas.toDataURL("image/png").split(',')[1];
+      const imageData = canvas.toDataURL("image/png").split(",")[1];
 
       const payload = {
         recipient: shareEmail,
         sender: shareSenderEmail,
         message: shareMessage,
-        subject: shareSubject || `${projectName || 'House Layout'} shared with you`,
+        subject:
+          shareSubject || `${projectName || "House Layout"} shared with you`,
         projectName: projectName,
         imageData: imageData,
-        projectDescription: projectDescription
+        projectDescription: projectDescription,
       };
 
-      await axios.post(SHARE_API_URL, payload, {
+      const res = await axios.post(SHARE_API_URL, payload, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
+      console.log(res.data);
+
+      if(res.data.success){
+
       toast.update(toastId, {
         render: `Layout shared successfully with ${shareEmail}`,
         type: "success",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
+    }
       setIsSharing(false);
     } catch (error) {
       console.error("Error sharing layout:", error);
       toast.update(toastId, {
-        render: error.response?.data?.error || "Failed to share layout. Please try again.",
+        render:
+          error.response?.data?.error ||
+          "Failed to share layout. Please try again.",
         type: "error",
         isLoading: false,
-        autoClose: 5000
+        autoClose: 5000,
       });
       setIsSharing(false);
     }
@@ -336,17 +348,45 @@ const HouseLayoutEditor = ({ data, onSave }) => {
 
   const availableFurniture = [
     { id: 1, name: "Bed", type: "bed", width: 5, height: 7, color: "#8B4513" },
-    { id: 2, name: "Sofa", type: "sofa", width: 6, height: 3, color: "#FF6347" },
-    { id: 3, name: "Table", type: "table", width: 4, height: 4, color: "#D2B48C" },
-    { id: 4, name: "Chair", type: "chair", width: 2, height: 2, color: "#A0522D" },
-    { id: 5, name: "Cabinet", type: "cabinet", width: 3, height: 6, color: "#696969" },
+    {
+      id: 2,
+      name: "Sofa",
+      type: "sofa",
+      width: 6,
+      height: 3,
+      color: "#FF6347",
+    },
+    {
+      id: 3,
+      name: "Table",
+      type: "table",
+      width: 4,
+      height: 4,
+      color: "#D2B48C",
+    },
+    {
+      id: 4,
+      name: "Chair",
+      type: "chair",
+      width: 2,
+      height: 2,
+      color: "#A0522D",
+    },
+    {
+      id: 5,
+      name: "Cabinet",
+      type: "cabinet",
+      width: 3,
+      height: 6,
+      color: "#696969",
+    },
     { id: 6, name: "TV", type: "tv", width: 4, height: 2, color: "#000000" },
   ];
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-gray-100">
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={5000}
           hideProgressBar={false}
@@ -357,7 +397,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
           draggable
           pauseOnHover
         />
-        
+
         <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <FaProjectDiagram /> 2D House Layout Editor
@@ -439,9 +479,15 @@ const HouseLayoutEditor = ({ data, onSave }) => {
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <FaShare /> Share Layout by Email
               </h2>
-              
+
               {shareSuccess ? (
-                <div className={`p-4 mb-4 rounded ${shareSuccess.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <div
+                  className={`p-4 mb-4 rounded ${
+                    shareSuccess.success
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
                   {shareSuccess.success ? (
                     <p>{shareSuccess.message}</p>
                   ) : (
@@ -456,7 +502,11 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                         setShareSuccess(null);
                       }
                     }}
-                    className={`mt-2 px-4 py-2 rounded flex items-center gap-2 ${shareSuccess.success ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
+                    className={`mt-2 px-4 py-2 rounded flex items-center gap-2 ${
+                      shareSuccess.success
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-red-600 hover:bg-red-700 text-white"
+                    }`}
                   >
                     {shareSuccess.success ? (
                       <>
@@ -505,7 +555,9 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                       value={shareSubject}
                       onChange={(e) => setShareSubject(e.target.value)}
                       className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={`${projectName || 'House Layout'} shared with you`}
+                      placeholder={`${
+                        projectName || "House Layout"
+                      } shared with you`}
                     />
                   </div>
                   <div className="mb-4">
@@ -531,15 +583,16 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                       onClick={shareLayoutByEmail}
                       className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center gap-2 transition-colors"
                     >
-                      {isSharing ? (
+                      {/* {isSharing ? (
                         <>
                           <span className="animate-spin">↻</span> Sending...
                         </>
                       ) : (
                         <>
                           <FaShare /> Send Email
-                        </>
-                      )}
+                        </> */}
+                      {/* )} */}
+                      <FaShare /> Send Email
                     </button>
                   </div>
                 </>
@@ -603,14 +656,23 @@ const HouseLayoutEditor = ({ data, onSave }) => {
             <div className="grid grid-cols-2 gap-4">
               {availableFurniture.map((item) => {
                 let icon;
-                switch(item.type) {
-                  case 'bed': icon = <FaBed />; break;
-                  case 'sofa': icon = <FaCouch />; break;
-                  case 'chair': icon = <FaChair />; break;
-                  case 'tv': icon = <FaTv />; break;
-                  default: icon = <FaBoxOpen />;
+                switch (item.type) {
+                  case "bed":
+                    icon = <FaBed />;
+                    break;
+                  case "sofa":
+                    icon = <FaCouch />;
+                    break;
+                  case "chair":
+                    icon = <FaChair />;
+                    break;
+                  case "tv":
+                    icon = <FaTv />;
+                    break;
+                  default:
+                    icon = <FaBoxOpen />;
                 }
-                
+
                 return (
                   <FurnitureItem
                     key={item.id}
@@ -619,7 +681,9 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                     onSelect={() => {
                       setSelectedFurniture(item);
                       setActiveTool("place");
-                      toast.info(`Selected ${item.name}. Click on room to place.`);
+                      toast.info(
+                        `Selected ${item.name}. Click on room to place.`
+                      );
                     }}
                     isSelected={selectedFurniture?.id === item.id}
                   />
@@ -633,9 +697,21 @@ const HouseLayoutEditor = ({ data, onSave }) => {
               </h2>
               <div className="flex flex-wrap gap-2">
                 {[
-                  "#E0E0E0", "#B0BEC5", "#90A4AE", "#789262", "#A1887F", 
-                  "#D7CCC8", "#F5F5F5", "#FFE0B2", "#FFCCBC", "#C5E1A5", 
-                  "#AED581", "#81D4FA", "#4DD0E1", "#B39DDB", "#CE93D8"
+                  "#E0E0E0",
+                  "#B0BEC5",
+                  "#90A4AE",
+                  "#789262",
+                  "#A1887F",
+                  "#D7CCC8",
+                  "#F5F5F5",
+                  "#FFE0B2",
+                  "#FFCCBC",
+                  "#C5E1A5",
+                  "#AED581",
+                  "#81D4FA",
+                  "#4DD0E1",
+                  "#B39DDB",
+                  "#CE93D8",
                 ].map((color) => (
                   <div
                     key={color}
@@ -669,7 +745,8 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                 </h3>
                 <p>Area: {selectedRoom.area} sq units</p>
                 <p>
-                  Dimensions: {Math.abs(selectedRoom.x2 - selectedRoom.x1).toFixed(2)} x{" "}
+                  Dimensions:{" "}
+                  {Math.abs(selectedRoom.x2 - selectedRoom.x1).toFixed(2)} x{" "}
                   {Math.abs(selectedRoom.y2 - selectedRoom.y1).toFixed(2)}
                 </p>
               </div>
@@ -940,7 +1017,9 @@ const FurnitureItem = ({ item, icon, onSelect, isSelected }) => {
     <div
       ref={drag}
       className={`p-2 border rounded-lg cursor-move flex flex-col items-center transition-transform hover:scale-105 ${
-        isSelected ? "border-blue-500 bg-blue-50 scale-105" : "border-gray-300 bg-white"
+        isSelected
+          ? "border-blue-500 bg-blue-50 scale-105"
+          : "border-gray-300 bg-white"
       } ${isDragging ? "opacity-50" : "opacity-100"}`}
       onClick={onSelect}
     >

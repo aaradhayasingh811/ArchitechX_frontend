@@ -256,12 +256,13 @@ const Templates = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log(propertyType);
 
+
       toast.success(`${template.name} template selected`);
       navigate("/dashboard/layout-form", {
         state: {
-          layout: {
+          
             data: propertyType,
-          },
+          
         },
       });
     } catch (err) {

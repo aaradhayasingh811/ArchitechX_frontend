@@ -10,7 +10,8 @@ import { useCallback } from "react";
 
 const LayoutForm = () => {
   const location = useLocation();
-  const incomingData = location?.state?.layout?.data;
+  const incomingData = location?.state?.layout ||location?.state?.data || null;
+  // console.log(incomingData)
 
   const [formData, setFormData] = useState({
     width: "",
@@ -48,7 +49,7 @@ const LayoutForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setView("2d");
-    console.log("Form data:", formData);
+    // console.log("Form data:", formData);
   };
 
   const open3D = () => {

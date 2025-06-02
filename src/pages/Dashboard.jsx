@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import a from "../assets/logo-sidebar.png"; 
+import a from "../assets/logo-sidebar.png";
 import {
   User,
   PlusCircle,
@@ -10,13 +10,29 @@ import {
   Menu,
   X,
 } from "lucide-react";
-
+import axios from "axios";
+import VastuChatbotToggle from "../components/VastuChatbotToggle";
+import { toast } from "react-toastify";
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    alert("Logged out!");
-    navigate("/");
+  const handleLogout = async () => {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/auth/api/v1/logout`,
+      "hii",
+      {
+        withCredentials: true,
+      }
+    );
+    if (response.status === 200) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      // alert("Logged out!");
+      toast.success("Successfully Logged Out!!");
+      navigate("/");
+    } else {
+      console.error("Logout failed");
+    }
   };
 
   return (
@@ -96,6 +112,7 @@ const Dashboard = () => {
         {/* This renders matched child route */}
         <Outlet />
       </div>
+      <VastuChatbotToggle />
     </div>
   );
 };

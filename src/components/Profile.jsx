@@ -1,8 +1,13 @@
 // components/Profile.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Mail, Key, ImagePlus, LogOut } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
 
 const Profile = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "John Doe",
     email: "john@example.com",
@@ -12,6 +17,37 @@ const Profile = () => {
     avatarPreview: null,
   });
 
+  useEffect(() => {
+    const getProfile = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/api/v1/profile`, {
+          withCredentials: true,
+        });
+
+        console.log(res.data)
+
+        if (res.status === 200) {
+          const user = res.data;
+          setFormData((prev) => ({
+            ...prev,
+            name: user.name || "John Doe",
+            email: user.email || "example.com",
+            avatar: user.avatar || null,
+            avatarPreview: user.avatar
+              ? `${import.meta.env.VITE_API_URL}/uploads/${user.avatar}`
+              : null,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        // alert("Failed to fetch profile data. Please try again later.");
+        toast.error("Failed to fetch profile data. Please try again later")
+      }
+    };
+
+    getProfile();
+  },[]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
@@ -20,25 +56,75 @@ const Profile = () => {
         ...prev,
         avatar: file,
         avatarPreview: URL.createObjectURL(file),
+
+
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    // Submit formData to backend here
-    alert("Profile updated successfully!");
+
+    const formPayload = new FormData();
+    formPayload.append("name", formData.name);
+    formPayload.append("email", formData.email);
+    if (formData.password) formPayload.append("password", formData.password);
+    if (formData.avatar) formPayload.append("avatar", formData.avatar);
+
+    try {
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/user/api/v1/profile`,
+        formPayload,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Profile updated successfully!");
+        // alert("Profile updated successfully!");
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error("Failed to update profile.")
+      console.error("Error updating profile:", error);
+      // alert("Failed to update profile.");
+    }
   };
 
-  const handleLogout = () => {
-    alert("Logged out!");
-    // Redirect or cleanup logic here
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/api/v1/logout`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        // alert("Logged out!");
+        toast.success("Logged out!");
+        navigate("/");
+      } else {
+        toast.error("Logout failed.");
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      toast.error("Logout error!");
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -47,9 +133,9 @@ const Profile = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center space-x-4">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-            {formData.avatarPreview ? (
+            {formData.avatar ? (
               <img
-                src={formData.avatarPreview}
+                src={formData.avatar}
                 alt="avatar preview"
                 className="object-cover w-full h-full"
               />

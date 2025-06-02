@@ -30,26 +30,26 @@ const ForgotPasswordFlow = () => {
       return;
     }
 
-    // to check baad me delete krna h
-    setMessage("OTP sent to your email.");
-        setStep("otp");
-    // 
-    // try {
-    //   setLoading(true);
-    //   const res = await axios.post("/api/forgot-password/send-otp", { email });
+   
+    
+    try {
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/api/v1/send-otp`, { email },{
+        withCredentials: true,
+      });
 
-    //   if (res.data.success) {
-    //     setMessage("OTP sent to your email.");
-    //     setStep("otp");
-    //   } else {
-    //     setError(res.data.message || "Failed to send OTP.");
-    //   }
-    // } catch (err) {
-    //   setError("An error occurred. Please try again.");
-    //   console.error(err);
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (res.data.success) {
+        setMessage("OTP sent to your email.");
+        setStep("otp");
+      } else {
+        setError(res.data.message || "Failed to send OTP.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async (e) => {
@@ -62,30 +62,28 @@ const ForgotPasswordFlow = () => {
       return;
     }
 
-    // to check baad me delete krna h
-    setMessage("OTP verified. Please set your new password.");
+
+    try {
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/api/v1/verify-otp`, {
+        email,
+        otp,
+      },
+
+      { withCredentials: true });
+
+      if (res.data.success) {
+        setMessage("OTP verified. Please set your new password.");
         setStep("reset");
-    // 
-
-    // try {
-    //   setLoading(true);
-    //   const res = await axios.post("/api/forgot-password/verify-otp", {
-    //     email,
-    //     otp,
-    //   });
-
-    //   if (res.data.success) {
-    //     setMessage("OTP verified. Please set your new password.");
-    //     setStep("reset");
-    //   } else {
-    //     setError(res.data.message || "Invalid OTP.");
-    //   }
-    // } catch (err) {
-    //   setError("An error occurred. Please try again.");
-    //   console.error(err);
-    // } finally {
-    //   setLoading(false);
-    // }
+      } else {
+        setError(res.data.message || "Invalid OTP.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async (e) => {
@@ -103,33 +101,32 @@ const ForgotPasswordFlow = () => {
       setError("Passwords do not match.");
       return;
     }
-            // 
-    setMessage("Password reset successful! Redirecting to login...");
-    window.location.href = "/login";
-// 
+ 
 
-    // try {
-    //   setLoading(true);
-    //   const res = await axios.post("/api/forgot-password/reset-password", {
-    //     email,
-    //     otp,
-    //     password,
-    //   });
 
-    //   if (res.data.success) {
-    //     setMessage("Password reset successful! Redirecting to login...");
-    //     setTimeout(() => {
-    //       window.location.href = "/login"; // or use your router redirect
-    //     }, 2500);
-    //   } else {
-    //     setError(res.data.message || "Failed to reset password.");
-    //   }
-    // } catch (err) {
-    //   setError("An error occurred. Please try again.");
-    //   console.error(err);
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/api/v1/reset-password`, {
+        email,
+        otp,
+        password,
+      },
+      { withCredentials: true });
+
+      if (res.data.success) {
+        setMessage("Password reset successful! Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/login"; // or use your router redirect
+        }, 2500);
+      } else {
+        setError(res.data.message || "Failed to reset password.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

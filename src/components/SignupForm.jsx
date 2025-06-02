@@ -2,9 +2,9 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "./Footer";
-
-const RECAPTCHA_SITE_KEY = "6LdRX0grAAAAAH3C0CSLgG1Ae2TJGYPy-FqYLmx-"; // Replace with your real site key
-
+import { useNavigate } from "react-router-dom";
+const RECAPTCHA_SITE_KEY = "6LdRX0grAAAAAH3C0CSLgG1Ae2TJGYPy-FqYLmx-"; 
+import { toast } from "react-toastify"; 
 const SignupForm = () => {
   const recaptchaRef = useRef();
   const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -20,6 +20,7 @@ const SignupForm = () => {
     avatar: null,
     captchaToken: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -109,28 +110,37 @@ const SignupForm = () => {
 
     console.log(formData);
 
-    // try {
-    //   setLoading(true);
-    //   const data = new FormData();
-    //   Object.entries(formData).forEach(([key, value]) => {
-    //     if (value) data.append(key, value);
-    //   });
+    try {
+      setLoading(true);
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) data.append(key, value);
+      });
 
-    //   const response = await axios.post("/api/register", data, {
-    //     headers: { "Content-Type": "multipart/form-data" },
-    //   });
+       const response = await axios.post(
+              `${import.meta.env.VITE_API_URL}/auth/api/v1/register`,
+              formData,
+              {
+                withCredentials: true,
+              }
+            );
+      if (response.data.success) {
+        // alert("Registration successful!Registration successful!");
+        toast.success("Registration successful! ");
+        navigate("/login");
 
-    //   if (response.data.success) {
-    //     alert("Registration successful!");
-    //   } else {
-    //     alert(response.data.message || "Registration failed.");
-    //   }
-    // } catch (error) {
-    //   console.error("Registration error:", error);
-    //   alert("An error occurred. Please try again.");
-    // } finally {
-    //   setLoading(false);
-    // }
+      } else {
+        // alert(response.data.message || "Registration failed.");
+        toast.error("Something went wrong !! Registration failed.");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("An error occurred. Please try again.")
+      // alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+      
+    }
   };
 
   const getPasswordStrengthColor = () => {
@@ -252,7 +262,7 @@ const SignupForm = () => {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-1">
                 Profile Picture (Optional)
               </label>
@@ -285,7 +295,7 @@ const SignupForm = () => {
                   </button>
                 )}
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-4">
               <div className="flex justify-center">

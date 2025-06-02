@@ -29,11 +29,14 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const API_URL = "http://localhost:3002/api/v1/create-layout";
+// const API_URL = "http://localhost:3002/api/v1/create-layout";
+const API_URL = `${import.meta.env.VITE_API_URL}/layout/api/v1/create-layout`;
 const ROOM_HEIGHT = 3;
 const WALL_THICKNESS = 0.2;
 const DOOR_HEIGHT = 2;
 const DOOR_WIDTH = 0.8;
+// At the top of the file
+THREE.Cache.enabled = true;
 
 const FLOOR_MATERIALS = [
   {
@@ -81,20 +84,38 @@ const FLOOR_MATERIALS = [
 const TexturedFloor = ({ width, depth, material, position, onClick }) => {
   const texture = useTexture(material.textureUrl);
   const meshRef = useRef();
+  console.log(texture);
 
   useEffect(() => {
     if (!texture || !meshRef.current) return;
 
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    // Configure texture properties
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(...material.repeat);
     texture.anisotropy = 16;
+    texture.encoding = THREE.sRGBEncoding;
     texture.needsUpdate = true;
 
-    meshRef.current.material.map = texture;
-    meshRef.current.material.roughness = material.roughness;
-    meshRef.current.material.metalness = material.metalness;
-    meshRef.current.material.needsUpdate = true;
+    // Create new material to force update
+    const newMaterial = new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: material.roughness,
+      metalness: material.metalness,
+      side: THREE.FrontSide
+    });
+
+
+    // Apply to mesh
+    meshRef.current.material = newMaterial;
+
+    return () => {
+      // Clean up texture
+      texture.dispose();
+      newMaterial.dispose();
+    };
   }, [texture, material]);
+
 
   return (
     <mesh
@@ -106,9 +127,10 @@ const TexturedFloor = ({ width, depth, material, position, onClick }) => {
     >
       <planeGeometry args={[width - WALL_THICKNESS * 2, depth - WALL_THICKNESS * 2]} />
       <meshStandardMaterial
-        roughness={material.roughness}
-        metalness={material.metalness}
-      />
+    map={texture}
+    roughness={material.roughness}
+    metalness={material.metalness}
+  />
     </mesh>
   );
 };
@@ -268,14 +290,14 @@ const RoomBox = ({
   }
 
  const floorMaterial = floorMaterials[room.name] || FLOOR_MATERIALS[0];
- console.log( "Floor Material:", floorMaterial);
+ console.log( "Floor Material:", floorMaterials[0], floorMaterials[room.name] , floorMaterial);
 
 const floor = (
   <TexturedFloor
     width={width}
     depth={depth}
     material={floorMaterial}
-position={[0, -ROOM_HEIGHT / 2 + 0.02, 0]}
+    position={[0, -ROOM_HEIGHT / 2 + 0.02, 0]}
     onClick={(e) => {
       e.stopPropagation();
       onFloorClick(e, room);
@@ -539,12 +561,15 @@ const Layout3D = ({ data }) => {
   const canvasRef = useRef();
   const paneRef = useRef();
 
-  const handleFloorMaterialChange = useCallback((room, material) => {
-    setFloorMaterials(prev => ({
-      ...prev,
-      [room.name]: material
-    }));
-  }, []);
+const handleFloorMaterialChange = useCallback((room, material) => {
+  // Clear texture cache for the new material
+  THREE.Cache.remove(material.textureUrl);
+  
+  setFloorMaterials(prev => ({
+    ...prev,
+    [room.name]: material
+  }));
+}, []);
 
   const availableFurniture = [
     {
@@ -772,9 +797,13 @@ const Layout3D = ({ data }) => {
   }, [selectedRoom, roomColors]);
 
   useEffect(() => {
+    console.log("api hit")
     axios
-      .post(API_URL, data)
+      .post(API_URL, data,{
+        withCredentials:true
+      })
       .then((response) => {
+        console.log(response.data);
         setLayout(response.data.layout);
         setError("");
       })

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {Pencil , Minus , ImageDown} from 'lucide-react';
 import { toPng } from "html-to-image";
+import {toast} from "react-toastify";
 
 const CampusEditor = () => {
   const ref = useRef();
@@ -63,10 +64,12 @@ const CampusEditor = () => {
         link.download = "exported-image.png";
         link.href = dataUrl;
         link.click();
-        alert("Image exported successfully!");
+        toast.success("Image exported successfully!");
+        // alert("Image exported successfully!");
       })
       .catch((err) => {
-        console.error("Failed to export image", err);
+        toast.error("Failed to export image!!");
+        // console.error("Failed to export image", err);
       });
 
   }

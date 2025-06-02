@@ -7,7 +7,7 @@ const CreateNewProject = () => {
 
   const handleCreate = () => {
     // Navigate to LayoutForm or Editor with blank layout
-    navigate("/dashboard/layout-form"); // Adjust route if needed
+    navigate("/dashboard/layout-form"); 
   };
 
   return (

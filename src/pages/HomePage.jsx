@@ -20,12 +20,13 @@ import {
   Award,
   Shield,
 } from "lucide-react";
-
+import { Mic, Send } from "lucide-react";
 import logo from "../assets/logo-home.png";
 import action from "../assets/action.mp4";
 import thumbnail from "../assets/thumbail.png";
 import { useNavigate } from "react-router-dom";
 import ContactSection from "../components/ContactSection";
+import VastuChatbotToggle from "../components/VastuChatbotToggle";
 
 const testimonialsData = [
   {
@@ -247,6 +248,8 @@ const HomePage = () => {
         )}
       </nav>
 
+      <VastuChatbotToggle />
+
       {/* Add top padding so content isn't hidden under fixed navbar */}
       <div className="pt-24">
         {/* Landing / Hero */}
@@ -400,6 +403,149 @@ const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* Vastu Chatbot Section */}
+        <section
+  id="vastu-chatbot"
+  className="py-16 px-6 md:px-20 bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 text-white"
+>
+  <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
+    <div className="md:w-1/2">
+      <div className="bg-white/20 p-3 rounded-full w-max mb-6 backdrop-blur-sm">
+        <Shield size={32} className="text-blue-200" />
+      </div>
+      <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        AI-Powered Vastu Consultant
+      </h2>
+      <p className="text-lg mb-6 text-blue-100">
+        Get personalized Vastu advice for your home instantly with our
+        AI chatbot. Our expert-trained system provides recommendations
+        based on ancient Vastu principles combined with modern
+        architectural knowledge.
+      </p>
+      <ul className="space-y-3 mb-8">
+        <li className="flex items-start gap-3">
+          <Check className="text-blue-200 mt-1 flex-shrink-0" />
+          <span>Instant analysis of your home layout</span>
+        </li>
+        <li className="flex items-start gap-3">
+          <Check className="text-blue-200 mt-1 flex-shrink-0" />
+          <span>Personalized recommendations for improvement</span>
+        </li>
+        <li className="flex items-start gap-3">
+          <Check className="text-blue-200 mt-1 flex-shrink-0" />
+          <span>24/7 availability with expert knowledge</span>
+        </li>
+        <li className="flex items-start gap-3">
+          <Check className="text-blue-200 mt-1 flex-shrink-0" />
+          <span>Free basic consultation</span>
+        </li>
+      </ul>
+      
+      {/* Suggested queries */}
+      <div className="mb-6">
+        <h3 className="text-blue-200 font-medium mb-2">Try asking:</h3>
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => setQuery("Best direction for main entrance?")}
+            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+          >
+            Best direction for main entrance?
+          </button>
+          <button 
+            onClick={() => setQuery("Vastu tips for kitchen?")}
+            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+          >
+            Vastu tips for kitchen?
+          </button>
+          <button 
+            onClick={() => setQuery("Ideal bedroom colors?")}
+            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+          >
+            Ideal bedroom colors?
+          </button>
+        </div>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4">
+        <button
+          onClick={() => setChatbotOpen(true)}
+          className="bg-blue-400 text-blue-900 font-semibold rounded-lg px-6 py-3 shadow-lg hover:bg-blue-300 transition flex items-center justify-center gap-2"
+        >
+          <MessageCircle size={20} /> Try Vastu Chatbot
+        </button>
+        <button
+          onClick={() => scrollToSection("faq")}
+          className="bg-transparent border-2 border-blue-300 text-blue-100 font-semibold rounded-lg px-6 py-3 hover:bg-blue-500/30 hover:text-white transition flex items-center justify-center gap-2 backdrop-blur-sm"
+        >
+          <Info size={20} /> Learn More
+        </button>
+      </div>
+    </div>
+    
+    <div className="md:w-1/2 relative">
+      <div className="bg-blue-700/50 backdrop-blur-md p-6 rounded-2xl border border-blue-400/30 shadow-xl glass-effect">
+        {/* Chat interface */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
+            <User size={20} className="text-white" />
+          </div>
+          <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
+            <p>What Vastu improvements for my living room?</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 justify-end mb-4">
+          <div className="bg-blue-200/90 text-blue-900 p-3 rounded-lg max-w-xs">
+            <p>Place sofa in northeast corner and add a green plant in southeast.</p>
+          </div>
+          <div className="bg-blue-300 w-10 h-10 rounded-full flex items-center justify-center">
+            <Shield size={20} className="text-blue-800" />
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
+            <User size={20} className="text-white" />
+          </div>
+          <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
+            <p>Best colors for bedroom according to Vastu?</p>
+          </div>
+        </div>
+        
+        {/* Voice search and input area */}
+        <div className="mt-6 flex items-center gap-2 bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+          <input 
+            type="text" 
+            placeholder="Ask your Vastu question..."
+            className="flex-1 bg-transparent border-none outline-none text-white placeholder-blue-200"
+          />
+          <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition">
+            <Mic size={18} className="text-white" />
+          </button>
+          <button className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 transition">
+            <Send size={18} className="text-white" />
+          </button>
+        </div>
+        
+        <div className="absolute -bottom-4 -right-4 bg-blue-400 text-blue-900 px-4 py-2 rounded-lg font-bold shadow-lg backdrop-blur-sm">
+          AI Vastu Expert
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {/* Glass effect CSS */}
+  <style jsx>{`
+    .glass-effect {
+      background: rgba(30, 58, 138, 0.4);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+  `}</style>
+</section>
 
         {/* Demo Video Section */}
         <section className="py-16 bg-gray-100">
