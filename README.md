@@ -50,6 +50,7 @@ ArchitechX is a comprehensive web application for architectural design that enab
 - **Microservice-ready Backend:** (Planned) Node.js, Express, MongoDB, Docker.
 - **RESTful APIs:** For layout generation and project management.
 - **Vastu Chatbot:** (Planned) AI-powered design suggestions.
+- **Walk in mode:** Give a walking mode in the home.
 
 ---
 
