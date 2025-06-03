@@ -16,9 +16,10 @@ import Editor from "./pages/Editor";
 import { useState } from "react";
 import VastuChatbotToggle from "./components/VastuChatbotToggle";
 export default function App() {
+  
   return (
     <>
-          <GoogleOAuthProvider clientId="448608361529-d7f2ugjsgf410d0nbuvhnl50mk4l482p.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId="448608361529-1oo8v2alfnu9b8v8nscp0n2q51hfnmhi.apps.googleusercontent.com">
       <BrowserRouter>
         <Routes>
             <Route path="/" element={<HomePage />} />

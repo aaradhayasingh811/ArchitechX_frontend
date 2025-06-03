@@ -64,7 +64,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
         }));
         setFurnitureItems(initialFurniture);
         setError("");
-        toast.success("Layout loaded successfully!");
+        // toast.success("Layout loaded successfully!");
       } catch (err) {
         setError("Failed to fetch layout: " + err.message);
         toast.error("Failed to load layout");
@@ -291,7 +291,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
 
       const payload = {
         recipient: shareEmail,
-        sender: shareSenderEmail,
+        sender: shareSenderEmail || "singhiitian811@gmail.com",
         message: shareMessage,
         subject:
           shareSubject || `${projectName || "House Layout"} shared with you`,
@@ -306,7 +306,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
         },
       });
 
-      console.log(res.data);
+      // console.log(res.data);
 
       if(res.data.success){
 
@@ -534,7 +534,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                       required
                     />
                   </div>
-                  <div className="mb-4">
+                  {/* <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">
                       Your Email
                     </label>
@@ -545,7 +545,7 @@ const HouseLayoutEditor = ({ data, onSave }) => {
                       className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="your@email.com"
                     />
-                  </div>
+                  </div> */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">
                       Subject

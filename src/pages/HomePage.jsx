@@ -406,146 +406,151 @@ const HomePage = () => {
 
         {/* Vastu Chatbot Section */}
         <section
-  id="vastu-chatbot"
-  className="py-16 px-6 md:px-20 bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 text-white"
->
-  <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
-    <div className="md:w-1/2">
-      <div className="bg-white/20 p-3 rounded-full w-max mb-6 backdrop-blur-sm">
-        <Shield size={32} className="text-blue-200" />
-      </div>
-      <h2 className="text-3xl md:text-4xl font-bold mb-4">
-        AI-Powered Vastu Consultant
-      </h2>
-      <p className="text-lg mb-6 text-blue-100">
-        Get personalized Vastu advice for your home instantly with our
-        AI chatbot. Our expert-trained system provides recommendations
-        based on ancient Vastu principles combined with modern
-        architectural knowledge.
-      </p>
-      <ul className="space-y-3 mb-8">
-        <li className="flex items-start gap-3">
-          <Check className="text-blue-200 mt-1 flex-shrink-0" />
-          <span>Instant analysis of your home layout</span>
-        </li>
-        <li className="flex items-start gap-3">
-          <Check className="text-blue-200 mt-1 flex-shrink-0" />
-          <span>Personalized recommendations for improvement</span>
-        </li>
-        <li className="flex items-start gap-3">
-          <Check className="text-blue-200 mt-1 flex-shrink-0" />
-          <span>24/7 availability with expert knowledge</span>
-        </li>
-        <li className="flex items-start gap-3">
-          <Check className="text-blue-200 mt-1 flex-shrink-0" />
-          <span>Free basic consultation</span>
-        </li>
-      </ul>
-      
-      {/* Suggested queries */}
-      <div className="mb-6">
-        <h3 className="text-blue-200 font-medium mb-2">Try asking:</h3>
-        <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={() => setQuery("Best direction for main entrance?")}
-            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
-          >
-            Best direction for main entrance?
-          </button>
-          <button 
-            onClick={() => setQuery("Vastu tips for kitchen?")}
-            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
-          >
-            Vastu tips for kitchen?
-          </button>
-          <button 
-            onClick={() => setQuery("Ideal bedroom colors?")}
-            className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
-          >
-            Ideal bedroom colors?
-          </button>
-        </div>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row gap-4">
-        <button
-          onClick={() => setChatbotOpen(true)}
-          className="bg-blue-400 text-blue-900 font-semibold rounded-lg px-6 py-3 shadow-lg hover:bg-blue-300 transition flex items-center justify-center gap-2"
+          id="vastu-chatbot"
+          className="py-16 px-6 md:px-20 bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 text-white"
         >
-          <MessageCircle size={20} /> Try Vastu Chatbot
-        </button>
-        <button
-          onClick={() => scrollToSection("faq")}
-          className="bg-transparent border-2 border-blue-300 text-blue-100 font-semibold rounded-lg px-6 py-3 hover:bg-blue-500/30 hover:text-white transition flex items-center justify-center gap-2 backdrop-blur-sm"
-        >
-          <Info size={20} /> Learn More
-        </button>
-      </div>
-    </div>
-    
-    <div className="md:w-1/2 relative">
-      <div className="bg-blue-700/50 backdrop-blur-md p-6 rounded-2xl border border-blue-400/30 shadow-xl glass-effect">
-        {/* Chat interface */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
-            <User size={20} className="text-white" />
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
+            <div className="md:w-1/2">
+              <div className="bg-white/20 p-3 rounded-full w-max mb-6 backdrop-blur-sm">
+                <Shield size={32} className="text-blue-200" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                AI-Powered Vastu Consultant
+              </h2>
+              <p className="text-lg mb-6 text-blue-100">
+                Get personalized Vastu advice for your home instantly with our
+                AI chatbot. Our expert-trained system provides recommendations
+                based on ancient Vastu principles combined with modern
+                architectural knowledge.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-3">
+                  <Check className="text-blue-200 mt-1 flex-shrink-0" />
+                  <span>Instant analysis of your home layout</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-blue-200 mt-1 flex-shrink-0" />
+                  <span>Personalized recommendations for improvement</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-blue-200 mt-1 flex-shrink-0" />
+                  <span>24/7 availability with expert knowledge</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="text-blue-200 mt-1 flex-shrink-0" />
+                  <span>Free basic consultation</span>
+                </li>
+              </ul>
+
+              {/* Suggested queries */}
+              <div className="mb-6">
+                <h3 className="text-blue-200 font-medium mb-2">Try asking:</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      setQuery("Best direction for main entrance?")
+                    }
+                    className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+                  >
+                    Best direction for main entrance?
+                  </button>
+                  <button
+                    onClick={() => setQuery("Vastu tips for kitchen?")}
+                    className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+                  >
+                    Vastu tips for kitchen?
+                  </button>
+                  <button
+                    onClick={() => setQuery("Ideal bedroom colors?")}
+                    className="text-sm bg-blue-500/30 hover:bg-blue-400/50 border border-blue-400/50 rounded-full px-3 py-1 transition backdrop-blur-sm"
+                  >
+                    Ideal bedroom colors?
+                  </button>
+                </div>
+              </div>
+
+              {/* <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => setChatbotOpen(true)}
+                  className="bg-blue-400 text-blue-900 font-semibold rounded-lg px-6 py-3 shadow-lg hover:bg-blue-300 transition flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={20} /> Try Vastu Chatbot
+                </button>
+                <button
+                  onClick={() => scrollToSection("faq")}
+                  className="bg-transparent border-2 border-blue-300 text-blue-100 font-semibold rounded-lg px-6 py-3 hover:bg-blue-500/30 hover:text-white transition flex items-center justify-center gap-2 backdrop-blur-sm"
+                >
+                  <Info size={20} /> Learn More
+                </button>
+              </div> */}
+            </div>
+
+            <div className="md:w-1/2 relative">
+              <div className="bg-blue-700/50 backdrop-blur-md p-6 rounded-2xl border border-blue-400/30 shadow-xl glass-effect">
+                {/* Chat interface */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    <User size={20} className="text-white" />
+                  </div>
+                  <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
+                    <p>What Vastu improvements for my living room?</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 justify-end mb-4">
+                  <div className="bg-blue-200/90 text-blue-900 p-3 rounded-lg max-w-xs">
+                    <p>
+                      Place sofa in northeast corner and add a green plant in
+                      southeast.
+                    </p>
+                  </div>
+                  <div className="bg-blue-300 w-10 h-10 rounded-full flex items-center justify-center">
+                    <Shield size={20} className="text-blue-800" />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    <User size={20} className="text-white" />
+                  </div>
+                  <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
+                    <p>Best colors for bedroom according to Vastu?</p>
+                  </div>
+                </div>
+
+                {/* Voice search and input area */}
+                <div className="mt-6 flex items-center gap-2 bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <input
+                    type="text"
+                    placeholder="Ask your Vastu question..."
+                    className="flex-1 bg-transparent border-none outline-none text-white placeholder-blue-200"
+                  />
+                  <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition">
+                    <Mic size={18} className="text-white" />
+                  </button>
+                  <button className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 transition">
+                    <Send size={18} className="text-white" />
+                  </button>
+                </div>
+
+                <div className="absolute -bottom-4 -right-4 bg-blue-400 text-blue-900 px-4 py-2 rounded-lg font-bold shadow-lg backdrop-blur-sm">
+                  AI Vastu Expert
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
-            <p>What Vastu improvements for my living room?</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 justify-end mb-4">
-          <div className="bg-blue-200/90 text-blue-900 p-3 rounded-lg max-w-xs">
-            <p>Place sofa in northeast corner and add a green plant in southeast.</p>
-          </div>
-          <div className="bg-blue-300 w-10 h-10 rounded-full flex items-center justify-center">
-            <Shield size={20} className="text-blue-800" />
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 mb-4">
-          <div className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center">
-            <User size={20} className="text-white" />
-          </div>
-          <div className="bg-blue-100/90 text-blue-900 p-3 rounded-lg max-w-xs">
-            <p>Best colors for bedroom according to Vastu?</p>
-          </div>
-        </div>
-        
-        {/* Voice search and input area */}
-        <div className="mt-6 flex items-center gap-2 bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-          <input 
-            type="text" 
-            placeholder="Ask your Vastu question..."
-            className="flex-1 bg-transparent border-none outline-none text-white placeholder-blue-200"
-          />
-          <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition">
-            <Mic size={18} className="text-white" />
-          </button>
-          <button className="p-2 rounded-full bg-blue-600 hover:bg-blue-500 transition">
-            <Send size={18} className="text-white" />
-          </button>
-        </div>
-        
-        <div className="absolute -bottom-4 -right-4 bg-blue-400 text-blue-900 px-4 py-2 rounded-lg font-bold shadow-lg backdrop-blur-sm">
-          AI Vastu Expert
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  {/* Glass effect CSS */}
-  <style jsx>{`
-    .glass-effect {
-      background: rgba(30, 58, 138, 0.4);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-  `}</style>
-</section>
+
+          {/* Glass effect CSS */}
+          <style jsx>{`
+            .glass-effect {
+              background: rgba(30, 58, 138, 0.4);
+              box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+              backdrop-filter: blur(8px);
+              -webkit-backdrop-filter: blur(8px);
+              border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+          `}</style>
+        </section>
 
         {/* Demo Video Section */}
         <section className="py-16 bg-gray-100">
@@ -643,120 +648,167 @@ const HomePage = () => {
 
         {/* Subscription Model */}
         <section
-          id="subscription"
-          className="py-16 px-6 md:px-20 bg-white text-gray-800"
+  id="subscription"
+  className="py-20 px-6 md:px-20 bg-gradient-to-b from-white to-gray-50 text-gray-800"
+>
+  <div className="max-w-6xl mx-auto text-center">
+    <div className="inline-flex items-center justify-center bg-blue-100 text-blue-600 p-4 rounded-full mb-6 shadow-inner">
+      <CreditCard size={36} className="animate-pulse" />
+    </div>
+    <h2 className="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+      Simple, Transparent Pricing
+    </h2>
+    <p className="max-w-2xl mx-auto mb-14 text-lg text-gray-600">
+      Choose a plan that suits your needs. No hidden fees, cancel anytime.
+      <span className="block mt-2 text-sm text-blue-500 font-medium">
+        ✨ 14-day money-back guarantee on all paid plans
+      </span>
+    </p>
+
+    {/* Toggle for annual/monthly billing */}
+    <div className="flex justify-center items-center mb-12">
+      <span className="mr-3 font-medium text-gray-700">Billed monthly</span>
+      <div className="relative inline-block w-14 mx-2 align-middle select-none">
+        <input 
+          type="checkbox" 
+          id="toggle"
+          className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-blue-500 appearance-none cursor-pointer transition-transform"
+        />
+        <label 
+          htmlFor="toggle" 
+          className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+        ></label>
+      </div>
+      <span className="ml-3 font-medium text-gray-700">
+        Billed annually <span className="text-blue-600">(save 20%)</span>
+      </span>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      {[
+        {
+          title: "Free Tier",
+          price: "₹ 0",
+          period: "per month",
+          features: [
+            "Access to 2D layout generation (up to 2BHK)",
+            "3 Layouts/day",
+            "Basic customization options",
+            "No 3D visualization",
+            "No export functionality",
+          ],
+          popular: false,
+          cta: "Start for Free"
+        },
+        {
+          title: "Pro Tier",
+          price: "₹ 499",
+          period: "per month",
+          features: [
+            "Unlimited 2D layout generation (3BHK+ supported)",
+            "3D visualization and customization",
+            "Export as PNG and MAIL",
+            "Vastu validation & AI recommendations",
+            "Priority customer support",
+            "Chatbot layout suggestions",
+          ],
+          popular: true,
+          cta: "Get Started"
+        },
+        {
+          title: "Enterprise",
+          price: "Custom",
+          period: "tailored plan",
+          features: [
+            "Multi-user/team collaboration",
+            "API access for design firms",
+            "Custom branding & white-labeling",
+            "Dedicated account manager",
+            "All Pro features included",
+            "On-premise deployment options",
+          ],
+          popular: false,
+          cta: "Contact Us"
+        },
+      ].map(({ title, price, period, features, popular, cta }) => (
+        <div
+          key={title}
+          className={`relative p-8 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
+            popular
+              ? "border-blue-600 shadow-lg transform md:-translate-y-4 bg-white"
+              : "border-gray-200 bg-white hover:border-blue-300"
+          } flex flex-col`}
         >
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center bg-blue-100 text-blue-600 p-3 rounded-full mb-4">
-              <CreditCard size={32} />
+          {popular && (
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold py-1 px-4 rounded-full whitespace-nowrap shadow-md">
+              MOST POPULAR
             </div>
-            <h2 className="text-3xl font-bold mb-2">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="max-w-2xl mx-auto mb-12 text-lg text-gray-600">
-              Choose a plan that suits your needs. No hidden fees, cancel
-              anytime.
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              {[
-                {
-                  title: "Starter",
-                  price: "$9.99",
-                  period: "per month",
-                  features: [
-                    "2D Layouts",
-                    "5 3D Models/month",
-                    "Basic Export Options",
-                    "Community Support",
-                    "1 Project",
-                  ],
-                  popular: false,
-                },
-                {
-                  title: "Professional",
-                  price: "$29.99",
-                  period: "per month",
-                  features: [
-                    "Unlimited 2D & 3D Models",
-                    "Advanced Export (GLTF, PDF)",
-                    "Priority Support",
-                    "100GB Cloud Storage",
-                    "10 Projects",
-                    "Team Collaboration",
-                  ],
-                  popular: true,
-                },
-                {
-                  title: "Enterprise",
-                  price: "Custom",
-                  period: "tailored plan",
-                  features: [
-                    "All Professional features",
-                    "Unlimited Projects",
-                    "Dedicated Account Manager",
-                    "Custom Integrations",
-                    "Onsite Training",
-                    "API Access",
-                  ],
-                  popular: false,
-                },
-              ].map(({ title, price, period, features, popular }) => (
-                <div
-                  key={title}
-                  className={`p-6 rounded-xl border-2 ${
-                    popular
-                      ? "border-blue-600 shadow-lg transform md:-translate-y-4"
-                      : "border-gray-200"
-                  } flex flex-col`}
-                >
-                  {popular && (
-                    <div className="bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded-full inline-block mx-auto -mt-8 mb-4">
-                      MOST POPULAR
-                    </div>
-                  )}
-                  <h3 className="text-xl font-semibold mb-2">{title}</h3>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold">{price}</span>
-                    <span className="text-gray-600"> {period}</span>
-                  </div>
-                  <ul className="mb-6 space-y-3 text-left flex-grow">
-                    {features.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check
-                          className="text-green-500 mt-1 flex-shrink-0"
-                          size={18}
-                        />
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    className={`w-full rounded-lg py-3 font-semibold transition mt-auto ${
-                      popular
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                    }`}
-                  >
-                    {popular ? "Get Started" : "Choose Plan"}
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Enterprise CTA */}
-            <div className="mt-12 max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl border border-gray-200">
-              <h3 className="text-2xl font-bold mb-3">Need something more?</h3>
-              <p className="text-gray-600 mb-6">
-                Our enterprise solutions offer custom pricing and features
-                tailored to your organization's needs.
-              </p>
-              <button className="bg-blue-600 text-white font-semibold rounded-lg px-6 py-3 hover:bg-blue-700 transition">
-                Contact Sales
-              </button>
-            </div>
+          )}
+          <h3 className="text-2xl font-bold mb-4 text-gray-900">{title}</h3>
+          <div className="mb-6">
+            <span className="text-4xl font-extrabold text-gray-900">{price}</span>
+            <span className="text-gray-600"> {period}</span>
           </div>
-        </section>
+          <ul className="mb-8 space-y-3 text-left flex-grow">
+            {features.map((feat, idx) => (
+              <li key={idx} className="flex items-start gap-3">
+                <Check
+                  className={`mt-1 flex-shrink-0 ${
+                    popular ? "text-blue-500" : "text-gray-400"
+                  }`}
+                  size={18}
+                />
+                <span className={popular ? "text-gray-800" : "text-gray-600"}>
+                  {feat}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <button
+            className={`w-full rounded-lg py-3.5 font-semibold transition mt-auto ${
+              popular
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-blue-200"
+                : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {cta}
+          </button>
+        </div>
+      ))}
+    </div>
+
+    {/* Enterprise CTA */}
+    <div className="mt-16 max-w-4xl mx-auto bg-gradient-to-br from-gray-50 to-white p-10 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-col md:flex-row items-center">
+        <div className="md:w-2/3 md:pr-8 mb-6 md:mb-0">
+          <h3 className="text-2xl font-bold mb-3 text-gray-900">Need something more?</h3>
+          <p className="text-gray-600">
+            Our enterprise solutions offer custom pricing and features tailored to your organization's needs. 
+            Includes volume discounts, SSO, and dedicated support.
+          </p>
+        </div>
+        <div className="md:w-1/3 flex-shrink-0">
+          <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg px-6 py-3.5 hover:from-blue-700 hover:to-indigo-700 transition shadow-md hover:shadow-lg">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Trust indicators */}
+    {/* <div className="mt-16 pt-8 border-t border-gray-200">
+      <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6">
+        Trusted by designers at
+      </h4>
+      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-70">
+        <CompanyLogo1 className="h-8" />
+        <CompanyLogo2 className="h-6" />
+        <CompanyLogo3 className="h-7" />
+        <CompanyLogo4 className="h-5" />
+      </div>
+    </div> */}
+  </div>
+</section>
 
         {/* Testimonials Section */}
         <section

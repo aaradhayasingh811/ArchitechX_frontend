@@ -5,12 +5,149 @@ import * as THREE from "three";
 import axios from "axios";
 import { Pane } from "tweakpane";
 import html2canvas from "html2canvas";
+import { useTexture } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
+import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter";
+import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-const API_URL = "http://localhost:3002/api/v1/create-layout";
-const ROOM_HEIGHT = 3;
-const WALL_THICKNESS = 0.2;
-const DOOR_HEIGHT = 2;
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-red-600 p-4">
+          Something went wrong. Please refresh the page.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// const API_URL = "http://localhost:3002/api/v1/create-layout";
+const API_URL = `${import.meta.env.VITE_API_URL}/layout/api/v1/create-layout`;
+const ROOM_HEIGHT = 6;
+const WALL_THICKNESS = 0.1;
+const DOOR_HEIGHT = 3;
 const DOOR_WIDTH = 0.8;
+// At the top of the file
+THREE.Cache.enabled = true;
+
+const FLOOR_MATERIALS = [
+  {
+    id: "grey1",
+    name: "Grey Floor",
+    textureUrl:
+      "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8PDw0PDw8NDw0PDQ0NDQ0NDQ8NDQ0NFREWFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMtNyg5OjcBCgoKDQ0NDg0NDysZFRktKysrNzcrNzctKystKysrKy0rKystKy0rLTcrKysrKysrKysrKysrKysrKysrKysrK//AABEIALcBEwMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABoQAQEBAQEBAQAAAAAAAAAAAAABEQISAyH/xAAXAQEBAQEAAAAAAAAAAAAAAAAAAQMC/8QAFhEBAQEAAAAAAAAAAAAAAAAAABEB/9oADAMBAAIRAxEAPwDw5CYfLRyy1IZDgMnDjUgjMhxqcnAZw40QZkOHCDOGQ2EBgxpWAxikaw4AWFYDOCxvFYDGLGsOAxixrFAYsGOmLAcsUdJBef0GbWNdOuWbyDnQ15ZsFKUiBSNQ8xrBBIZDzGvIM+TI0JAUWGNYDMixrFgMwlYDJWEFFSsUGJGAQYgGKlUGZFYYgZw4cWAycKQYxY0sAWMVus2AxWW7GcBJIBy6Rz5dIBajLUBVQqAJCSoEcQBJAlViBYooQAaAKFQwEEgIQApRAkkDKiGoGstWsmgZxtmgziSAcRtnhuUDCIYBS1YoZSDKCqWoEkgCKgLEiAiRAEQ0AkgSRAGggEjQYGFAEaKgzWTRQCFQHhqM/NoGiGgBiIAgqIiwgkiCoIBakoCKiAFIEiqDKKAJICgQYpSAVmtCoMUNWDAc9KxAvm3HPh0gNRqMmAYQlE1GWgSSBGCUgWWgAOJAQQCLJA6ggSWgEkYCSQMlABUqqgzWa3WKDKWIGOHTGeW9AxqRmNSgUogREKhQIGIQgCEBSQKIigkNIHAQCowoAUgSSoMogENVCCrPTVFBzSQDlpnlqA1CJTAJBoDSI0BC1KFJAkqIBlLJgFJACCBCAFJACEBBABVIAsOABWOqeqx1UEgQHLbHLcBNQGASEBhZ06CISjUQNoIJaBQ0gVVEAKQJAgFEgVS0QChqBEDQVoVCArFjdYtBJnSA5dI58twGtLMIEggkggdQKhIShCSCMGpRrVrKBpMnQKGi0GhrOrUGrUyijVQ0KLUBqDVZqABnpq1igkEKeadc+a1ojcp1zalBvTrB0GizqBqJjVoOmrWNWg2qzaLQa0saQaWs6tBrRoGg1qGjQaFGjqg1p1zjUoNLWdWgdVY06BXTI0FQgAtQQo5NSBStSpA1KtSEOpIAdSAxaEA9HUgWnQgK0IDaLUgGnUgQ0oEkgOhIGdKQBJANCQrKSB//2Q==",
+    roughness: 0.5,
+    metalness: 0.0,
+    repeat: [4, 4],
+  },
+  {
+    id: "wood1",
+    name: "Wooden Floor",
+    textureUrl: "https://threejs.org/examples/textures/hardwood2_diffuse.jpg",
+    roughness: 0.3,
+    metalness: 0.0,
+    repeat: [4, 4],
+  },
+  {
+    id: "tiles1",
+    name: "White Tiles",
+    textureUrl:
+      "data:image/jpeg;base64,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",
+    roughness: 0.2,
+    metalness: 0.1,
+    repeat: [8, 8],
+  },
+  {
+    id: "carpet1",
+    name: "Carpet",
+    textureUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvJKLYazqkcOqcjaJ6cl5505nAf1HoB0UfLQ&s",
+    roughness: 0.8,
+    metalness: 0.0,
+    repeat: [2, 2],
+  },
+  {
+    id: "concrete1",
+    name: "Concrete",
+    textureUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiau-GimslZmwam32H_NkPQSXKtEC_6Bnp5Q&s",
+    roughness: 0.7,
+    metalness: 0.0,
+    repeat: [4, 4],
+  },
+  {
+    id: "marble1",
+    name: "Marble",
+    textureUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREOdWARisI15oAyF4rmlfFw_4hXiRteiDmzQ&s",
+    roughness: 0.1,
+    metalness: 0.1,
+    repeat: [4, 4],
+  },
+];
+
+const TexturedFloor = ({ width, depth, material, position, onClick }) => {
+  const texture = useTexture(material.textureUrl);
+  const meshRef = useRef();
+
+  useEffect(() => {
+    if (!texture || !meshRef.current) return;
+
+    // Configure texture properties
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(...material.repeat);
+    texture.anisotropy = 16;
+    texture.encoding = THREE.sRGBEncoding;
+
+    // Force texture update
+    texture.needsUpdate = true;
+
+    // Create new material with the texture
+    const newMaterial = new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: material.roughness,
+      metalness: material.metalness,
+      side: THREE.DoubleSide,
+    });
+
+    // Apply to mesh
+    meshRef.current.material = newMaterial;
+
+    return () => {
+      // Clean up
+      texture.dispose();
+      newMaterial.dispose();
+    };
+  }, [texture, material]);
+
+  return (
+    <mesh
+      ref={meshRef}
+      position={position}
+      rotation={[-Math.PI / 2, 0, 0]}
+      receiveShadow
+      onClick={onClick}
+    >
+      <planeGeometry args={[width, depth]} />
+    </mesh>
+  );
+};
 
 const FurnitureItem = ({ type, position, rotation, onClick, isSelected }) => {
   let geometry,
@@ -81,7 +218,6 @@ const Door = ({ position, rotation }) => {
         <boxGeometry args={[DOOR_WIDTH, DOOR_HEIGHT, 0.05]} />
         <meshStandardMaterial color="#8B4513" />
       </mesh>
-      {/* Door frame */}
       <mesh position={[0, DOOR_HEIGHT / 2, -WALL_THICKNESS / 2 - 0.01]}>
         <boxGeometry args={[DOOR_WIDTH + 0.2, DOOR_HEIGHT + 0.2, 0.1]} />
         <meshStandardMaterial color="#5D4037" />
@@ -103,6 +239,8 @@ const RoomBox = ({
   selectedFurnitureType,
   onFloorClick,
   roomColors,
+  floorMaterials,
+  showCeilings,
 }) => {
   const [hovered, setHover] = useState(false);
   const groupRef = useRef();
@@ -111,34 +249,27 @@ const RoomBox = ({
   const x = room.x1 + width / 2;
   const z = room.y1 + depth / 2;
 
-  // Get the color for this room (default to grey if not specified)
   const roomColor = roomColors[room.name] || "#cccccc";
 
-  // Create walls
   const walls = [
-    // North wall
     {
       position: [0, ROOM_HEIGHT / 2, depth / 2 - WALL_THICKNESS / 2],
       size: [width, ROOM_HEIGHT, WALL_THICKNESS],
     },
-    // South wall
     {
       position: [0, ROOM_HEIGHT / 2, -depth / 2 + WALL_THICKNESS / 2],
       size: [width, ROOM_HEIGHT, WALL_THICKNESS],
     },
-    // East wall
     {
       position: [width / 2 - WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0],
       size: [WALL_THICKNESS, ROOM_HEIGHT, depth],
     },
-    // West wall
     {
       position: [-width / 2 + WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0],
       size: [WALL_THICKNESS, ROOM_HEIGHT, depth],
     },
   ];
 
-  // Find doors between this room and corridor
   const doors = [];
   if (showDoors) {
     const corridor = allRooms.find((r) => r.name === "Corridor");
@@ -173,43 +304,41 @@ const RoomBox = ({
     }
   }
 
-  // Floor
+  const floorMaterial = floorMaterials[room.name] || FLOOR_MATERIALS[0];
+  //  console.log( "Floor Material:", floorMaterials[0], floorMaterials[room.name] , floorMaterial);
+
+  //  to check
   const floor = (
-    <mesh
-      position={[0, -ROOM_HEIGHT / 2 + 0.01, 0]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      receiveShadow
+    <TexturedFloor
+      width={width}
+      depth={depth}
+      material={floorMaterial}
+      // position={[0, -ROOM_HEIGHT / 2 + 0.02, 0]}
+      position={[0, ROOM_HEIGHT / 8 + 0.02, 0]}
       onClick={(e) => {
         e.stopPropagation();
         onFloorClick(e, room);
       }}
-    >
-      <planeGeometry
-        args={[width - WALL_THICKNESS * 2, depth - WALL_THICKNESS * 2]}
-      />
-      <meshStandardMaterial
-        color={roomColor}
-        opacity={activeTool === "place" ? 0.5 : 0.8}
-        transparent
-      />
-    </mesh>
+    />
   );
-
-  // Ceiling
-  const ceiling = (
+  const ceiling = showCeilings && (
     <mesh
-      position={[0, ROOM_HEIGHT / 2 - 0.01, 0]}
+      position={[0, ROOM_HEIGHT - 0.02, 0]}
       rotation={[Math.PI / 2, 0, 0]}
       receiveShadow
     >
       <planeGeometry
         args={[width - WALL_THICKNESS * 2, depth - WALL_THICKNESS * 2]}
       />
-      <meshStandardMaterial color="#f0f0f0" />
+      <meshStandardMaterial
+        color="#ffffff"
+        roughness={0.8}
+        metalness={0.1}
+        side={THREE.DoubleSide}
+      />{" "}
     </mesh>
   );
 
-  // Furniture
   const renderFurniture = () => {
     if (!room.furniture || room.furniture.length === 0) return null;
 
@@ -217,7 +346,7 @@ const RoomBox = ({
       <FurnitureItem
         key={i}
         type={item.type}
-        position={[item.x - x, 0, item.y - z]}
+        position={[item.x - x, 2, item.y - z]}
         rotation={[0, item.rotation || 0, 0]}
         onClick={() => onFurnitureClick(item)}
         isSelected={selectedFurniture?.id === item.id}
@@ -246,11 +375,9 @@ const RoomBox = ({
         setHover(false);
       }}
     >
-      {/* Walls */}
       {walls.map((wall, index) => (
         <mesh key={index} position={wall.position}>
           <boxGeometry args={wall.size} />
-          // In RoomBox component, replace the wall material with this:
           <meshStandardMaterial
             color={
               hovered || selected ? lightenColor(roomColor, 20) : roomColor
@@ -259,13 +386,12 @@ const RoomBox = ({
             metalness={0.1}
             emissive={
               hovered || selected ? lightenColor(roomColor, 10) : roomColor
-            } // Changed from "#000000"
+            }
             emissiveIntensity={hovered || selected ? 0.2 : 0}
           />
         </mesh>
       ))}
 
-      {/* Doors */}
       {doors.map((door, i) => (
         <Door key={i} position={door.position} rotation={door.rotation} />
       ))}
@@ -274,7 +400,6 @@ const RoomBox = ({
       {ceiling}
       {renderFurniture()}
 
-      {/* Placement indicator */}
       {activeTool === "place" && selected && (
         <mesh
           position={[0, -ROOM_HEIGHT / 2 + 0.02, 0]}
@@ -288,16 +413,20 @@ const RoomBox = ({
       )}
 
       <Text
-        position={[0, ROOM_HEIGHT + 0.3, 0]}
-        fontSize={0.5}
+        position={[0, ROOM_HEIGHT + 0.5, 0]}
+        fontSize={0.9}
         color="#111"
         anchorX="center"
         anchorY="middle"
+        outlineWidth={0.025}
+        outlineColor="#eee"
+        maxWidth={2}
+        lineHeight={1}
+        letterSpacing={-0.02}
       >
         {room.name}
       </Text>
 
-      {/* Measurement labels */}
       {selected && (
         <>
           <Html position={[width / 2, 0, 0]} center>
@@ -308,6 +437,7 @@ const RoomBox = ({
           </Html>
         </>
       )}
+      {ceiling}
     </group>
   );
 };
@@ -327,9 +457,7 @@ function findSharedWall(room1, room2) {
     bottom: Math.max(room2.y1, room2.y2),
   };
 
-  // Check for vertical shared walls (left/right)
   if (Math.abs(r1.left - r2.right) < 0.1) {
-    // room1 left touches room2 right
     const overlapTop = Math.max(r1.top, r2.top);
     const overlapBottom = Math.min(r1.bottom, r2.bottom);
     if (overlapBottom > overlapTop) {
@@ -340,7 +468,6 @@ function findSharedWall(room1, room2) {
       };
     }
   } else if (Math.abs(r1.right - r2.left) < 0.1) {
-    // room1 right touches room2 left
     const overlapTop = Math.max(r1.top, r2.top);
     const overlapBottom = Math.min(r1.bottom, r2.bottom);
     if (overlapBottom > overlapTop) {
@@ -352,9 +479,7 @@ function findSharedWall(room1, room2) {
     }
   }
 
-  // Check for horizontal shared walls (top/bottom)
   if (Math.abs(r1.top - r2.bottom) < 0.1) {
-    // room1 top touches room2 bottom
     const overlapLeft = Math.max(r1.left, r2.left);
     const overlapRight = Math.min(r1.right, r2.right);
     if (overlapRight > overlapLeft) {
@@ -365,7 +490,6 @@ function findSharedWall(room1, room2) {
       };
     }
   } else if (Math.abs(r1.bottom - r2.top) < 0.1) {
-    // room1 bottom touches room2 top
     const overlapLeft = Math.max(r1.left, r2.left);
     const overlapRight = Math.min(r1.right, r2.right);
     if (overlapRight > overlapLeft) {
@@ -381,20 +505,18 @@ function findSharedWall(room1, room2) {
 }
 
 function lightenColor(color, percent) {
-  // If it's a THREE.Color, convert to hex first
   if (color instanceof THREE.Color) {
     color = `#${color.getHexString()}`;
   }
-  
-  // Handle hex strings
+
   const num = parseInt(color.replace("#", ""), 16);
   const amt = Math.round(2.55 * percent);
-  
-  const R = Math.min(255, ((num >> 16) + amt));
-  const G = Math.min(255, ((num >> 8 & 0x00FF) + amt));
-  const B = Math.min(255, ((num & 0x0000FF) + amt));
-  
-  return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+
+  const R = Math.min(255, (num >> 16) + amt);
+  const G = Math.min(255, ((num >> 8) & 0x00ff) + amt);
+  const B = Math.min(255, (num & 0x0000ff) + amt);
+
+  return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
 }
 
 const CameraController = ({ boundaries, mode }) => {
@@ -443,10 +565,16 @@ const Layout3D = ({ data }) => {
   const [viewMode, setViewMode] = useState("3d");
   const [gridVisible, setGridVisible] = useState(true);
   const [lightPosition, setLightPosition] = useState([20, 50, 20]);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [scene, setScene] = useState(null);
+  const [renderer, setRenderer] = useState(null);
+  const [camera, setCamera] = useState(null);
+  const [showCeilings, setShowCeilings] = useState(false);
+
   const [roomColors, setRoomColors] = useState(() => {
     const colors = {};
     data.rooms?.forEach((room) => {
-      colors[room.name] = "#cccccc"; // Default grey color
+      colors[room.name] = "#cccccc";
     });
     return colors;
   });
@@ -455,17 +583,112 @@ const Layout3D = ({ data }) => {
   const [selectedFurnitureType, setSelectedFurnitureType] = useState(null);
   const [projectName, setProjectName] = useState("My 3D Layout");
   const [isEditingProjectInfo, setIsEditingProjectInfo] = useState(false);
+  const [floorMaterials, setFloorMaterials] = useState(() => {
+    const materials = {};
+    data.rooms?.forEach((room) => {
+      materials[room.name] = FLOOR_MATERIALS[0];
+    });
+    return materials;
+  });
+  const [selectedFloorMaterial, setSelectedFloorMaterial] = useState(null);
+  const [isFloorEditingMode, setIsFloorEditingMode] = useState(false);
   const canvasRef = useRef();
   const paneRef = useRef();
+  const handleCanvasReady = useCallback((state) => {
+    setScene(state.scene);
+    setRenderer(state.gl);
+    setCamera(state.camera);
+  }, []);
+
+  const handleFloorMaterialChange = useCallback((room, material) => {
+    // Clear texture cache for the new material
+    THREE.Cache.remove(material.textureUrl);
+
+    setFloorMaterials((prev) => ({
+      ...prev,
+      [room.name]: material,
+    }));
+  }, []);
+
+  const exportScene = async (format) => {
+    if (!scene) {
+      console.error("Three.js scene not available");
+      alert("Please wait for the scene to load before exporting");
+      return;
+    }
+
+    try {
+      switch (format) {
+        case "gltf":
+        case "glb": {
+          const exporter = new GLTFExporter();
+          const options = {
+            binary: format === "glb",
+            trs: false,
+            onlyVisible: true,
+            embedImages: true,
+          };
+          const result = await exporter.parseAsync(scene, options);
+          if (result instanceof ArrayBuffer) {
+            saveArrayBuffer(result, `${projectName || "layout"}.glb`);
+          } else {
+            saveString(
+              JSON.stringify(result),
+              `${projectName || "layout"}.gltf`
+            );
+          }
+          break;
+        }
+        case "obj": {
+          const exporter = new OBJExporter();
+          const result = exporter.parse(scene);
+          saveString(result, `${projectName || "layout"}.obj`);
+          break;
+        }
+        case "stl": {
+          const exporter = new STLExporter();
+          const result = exporter.parse(scene, { binary: true });
+          saveArrayBuffer(result, `${projectName || "layout"}.stl`);
+          break;
+        }
+        default:
+          console.warn(`Unknown export format: ${format}`);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert(`Export failed: ${error.message}`);
+    }
+  };
+
+  // Helper functions for downloading files
+  const saveString = (text, filename) => {
+    const blob = new Blob([text], { type: "text/plain" });
+    saveBlob(blob, filename);
+  };
+
+  const saveArrayBuffer = (buffer, filename) => {
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveBlob(blob, filename);
+  };
+
+  const saveBlob = (blob, filename) => {
+    const link = document.createElement("a");
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const availableFurniture = [
     {
       id: 1,
       name: "Bed",
       type: "bed",
-      width: 1.8,
-      depth: 2,
-      height: 0.3,
+      width: 2,
+      depth: 6,
+      height: 3,
       color: "#5d4037",
     },
     {
@@ -523,7 +746,6 @@ const Layout3D = ({ data }) => {
 
     paneRef.current = pane;
 
-    // Global controls
     const params = {
       mode: viewMode,
       grid: gridVisible,
@@ -569,7 +791,6 @@ const Layout3D = ({ data }) => {
         }
       });
 
-    // Light position controls
     const lightParams = {
       x: lightPosition[0],
       y: lightPosition[1],
@@ -615,13 +836,11 @@ const Layout3D = ({ data }) => {
       });
 
     return () => pane.dispose();
-  }, []);
+  }, [viewMode, gridVisible, showDoors, activeTool, lightPosition]);
 
-  // Room-specific controls
   useEffect(() => {
     if (!paneRef.current) return;
 
-    // Clear previous room controls
     if (paneRef.current.roomFolder) {
       paneRef.current.remove(paneRef.current.roomFolder);
       paneRef.current.roomFolder = null;
@@ -629,35 +848,30 @@ const Layout3D = ({ data }) => {
 
     if (!selectedRoom) return;
 
-    // Create a new folder for the selected room
     const roomFolder = paneRef.current.addFolder({
       title: `Room: ${selectedRoom.name}`,
       expanded: true,
     });
     paneRef.current.roomFolder = roomFolder;
 
-    // Room color control
-    const initialColor = roomColors[selectedRoom.name] || "#cccccc";
-    console.log("Hello", selectedRoom);
-
     const colorParams = {
-      color: initialColor,
+      color: roomColors[selectedRoom.name] || "#cccccc",
     };
-roomFolder
-  .addBinding(colorParams, "color", {
-    label: "Color",
-    view: "color",
-    color: { type: "hex" }, // Force hex format
-    picker: "inline", // Optional: change picker style
-  })
-  .on("change", (ev) => {
-    setRoomColors((prev) => ({
-      ...prev,
-      [selectedRoom.name]: ev.value,
-    }));
-  });
 
-    // Room info
+    roomFolder
+      .addBinding(colorParams, "color", {
+        label: "Color",
+        view: "color",
+        color: { type: "hex" },
+        picker: "inline",
+      })
+      .on("change", (ev) => {
+        setRoomColors((prev) => ({
+          ...prev,
+          [selectedRoom.name]: ev.value,
+        }));
+      });
+
     const roomParams = {
       name: selectedRoom.name,
       width: `${(selectedRoom.x2 - selectedRoom.x1).toFixed(2)}m`,
@@ -692,11 +906,14 @@ roomFolder
     };
   }, [selectedRoom, roomColors]);
 
-  // Load layout data
   useEffect(() => {
+    // console.log("api hit")
     axios
-      .post(API_URL, data)
+      .post(API_URL, data, {
+        withCredentials: true,
+      })
       .then((response) => {
+        // console.log(response.data);
         setLayout(response.data.layout);
         setError("");
       })
@@ -730,7 +947,7 @@ roomFolder
     (direction) => {
       if (!selectedFurniture || !selectedRoom) return;
 
-      const moveAmount = 0.1; // meters
+      const moveAmount = 0.1;
 
       setLayout((prev) => ({
         ...prev,
@@ -793,7 +1010,6 @@ roomFolder
       if (activeTool === "select") {
         setSelectedFurniture(furniture);
       } else if (activeTool === "delete") {
-        // Remove furniture from the room
         setLayout((prev) => ({
           ...prev,
           rooms: prev.rooms.map((room) => ({
@@ -811,13 +1027,22 @@ roomFolder
   const handleFloorClick = useCallback(
     (e, room) => {
       e.stopPropagation();
-      if (activeTool === "place" && selectedFurnitureType) {
+
+      if (isFloorEditingMode && selectedFloorMaterial) {
+        handleFloorMaterialChange(room, selectedFloorMaterial);
+      } else if (activeTool === "place" && selectedFurnitureType) {
         const point = e.point;
         addFurnitureToRoom(selectedFurnitureType, [point.x, point.z], room);
-        setSelectedRoom(room); // Ensure the room is selected
+        setSelectedRoom(room);
       }
     },
-    [activeTool, selectedFurnitureType]
+    [
+      isFloorEditingMode,
+      selectedFloorMaterial,
+      activeTool,
+      selectedFurnitureType,
+      handleFloorMaterialChange,
+    ]
   );
 
   const addFurnitureToRoom = useCallback(
@@ -830,7 +1055,6 @@ roomFolder
       );
       if (!furnitureTemplate) return;
 
-      // Calculate default position (center of room) if no position provided
       const defaultX = targetRoom.x1 + (targetRoom.x2 - targetRoom.x1) / 2;
       const defaultY = targetRoom.y1 + (targetRoom.y2 - targetRoom.y1) / 2;
 
@@ -896,7 +1120,7 @@ roomFolder
         }
       );
 
-      console.log("Layout saved:", response.data);
+      // console.log("Layout saved:", response.data);
       alert("Layout saved successfully!");
       setIsEditingProjectInfo(false);
     } catch (err) {
@@ -920,267 +1144,353 @@ roomFolder
   const centerZ = height / 2;
 
   return (
-    <div
-      style={{ width: "100%", height: "80vh", position: "relative" }}
-      className="canvas-container"
-    >
-      {/* Control panel container */}
+    <ErrorBoundary>
       <div
-        id="controls-container"
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 10,
-          zIndex: 100,
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          padding: "10px",
-          color: "#ffffff",
-          borderRadius: "5px",
-          maxWidth: "300px",
-        }}
-      />
-
-      {/* Toolbar */}
-      <div
-        style={{
-          position: "absolute",
-          top: 10,
-          left: 10,
-          zIndex: 100,
-          display: "flex",
-          gap: "10px",
-        }}
+        style={{ width: "100%", height: "80vh", position: "relative" }}
+        className="canvas-container"
       >
-        <button
-          onClick={() => setViewMode(viewMode === "3d" ? "2d" : "3d")}
-          style={{ padding: "5px 10px", cursor: "pointer" }}
-          className="bg-blue-900 text-white rounded hover:bg-blue-600 transition"
-        >
-          {viewMode === "3d" ? "Switch to 2D" : "Switch to 3D"}
-        </button>
-        <button
-          onClick={captureScreenshot}
-          style={{ padding: "5px 10px", cursor: "pointer" }}
-          className="bg-green-900 text-white rounded hover:bg-green-600 transition"
-        >
-          Export Screenshot
-        </button>
-        <button
-          onClick={() => setIsEditingProjectInfo(true)}
-          style={{ padding: "5px 10px", cursor: "pointer" }}
-          className="bg-purple-900 text-white rounded hover:bg-purple-600 transition"
-        >
-          Project Info
-        </button>
-      </div>
-      {/* Furniture toolbar */}
-      <div
-  className="fixed bottom-2 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 flex-wrap shadow-md"
->
-  <h3 className="font-bold text-gray-800">Furniture:</h3>
-  {availableFurniture.map((item) => (
-    <button
-      key={item.id}
-      onClick={() => {
-        setActiveTool("place");
-        setSelectedFurnitureType(item.type);
-      }}
-      className={`px-2 py-1 cursor-pointer rounded hover:opacity-100 transition-all duration-200 text-white font-medium text-sm
-        ${selectedFurnitureType === item.type ? 'ring-2 ring-black' : 'opacity-70'}
-        ${selectedFurniture?.type === item.type ? 'opacity-100' : ''}`}
-      style={{ backgroundColor: item.color }}
-      title={item.name}
-    >
-      {item.name}
-    </button>
-  ))}
-  
-  {/* Furniture controls toolbar */}
-  {selectedFurniture && (
-    <div
-      className="fixed bottom-16 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 shadow-md"
-    >
-      <button
-        onClick={unselectFurniture}
-        className="px-3 py-1 cursor-pointer bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 text-sm font-medium"
-      >
-        Unselect
-      </button>
-      <button
-        onClick={deleteSelectedFurniture}
-        className="px-3 py-1 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
-      >
-        Delete
-      </button>
-      <div className="flex flex-col gap-1">
-        <button
-          onClick={() => moveFurniture("forward")}
-          className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
-        >
-          ↑
-        </button>
-        <div className="flex gap-1">
-          <button
-            onClick={() => moveFurniture("left")}
-            className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => moveFurniture("backward")}
-            className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
-          >
-            ↓
-          </button>
-          <button
-            onClick={() => moveFurniture("right")}
-            className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
-          >
-            →
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
-</div>
-
-      {/* Room info panel */}
-      {selectedRoom && (
         <div
+          id="controls-container"
           style={{
-            position: "absolute",
-            bottom: 10,
+            position: "fixed",
+            top: 10,
             right: 10,
-            zIndex: 100,
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            zIndex: 1000,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
             padding: "10px",
+            color: "#ffffff",
             borderRadius: "5px",
             maxWidth: "300px",
           }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            // top: 10,
+            left: 10,
+            zIndex: 100,
+            display: "flex",
+            gap: "10px",
+          }}
         >
-          <h3 className="font-bold">{selectedRoom.name}</h3>
-          <p>
-            Dimensions: {(selectedRoom.x2 - selectedRoom.x1).toFixed(2)}m x{" "}
-            {(selectedRoom.y2 - selectedRoom.y1).toFixed(2)}m
-          </p>
-          <p>
-            Area:{" "}
-            {(
-              (selectedRoom.x2 - selectedRoom.x1) *
-              (selectedRoom.y2 - selectedRoom.y1)
-            ).toFixed(2)}
-            m²
-          </p>
-          {selectedRoom.furniture && selectedRoom.furniture.length > 0 && (
-            <div>
-              <p className="font-bold mt-2">Furniture:</p>
-              <ul>
-                {selectedRoom.furniture.map((item, i) => (
-                  <li
-                    key={i}
-                    className={
-                      selectedFurniture?.id === item.id ? "font-bold" : ""
-                    }
+          <button
+            onClick={() => setViewMode(viewMode === "3d" ? "2d" : "3d")}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-blue-900 text-white rounded hover:bg-blue-600 transition"
+          >
+            {viewMode === "3d" ? "Switch to 2D" : "Switch to 3D"}
+          </button>
+          <button
+            onClick={captureScreenshot}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-green-900 text-white rounded hover:bg-green-600 transition"
+          >
+            Export Screenshot
+          </button>
+          {/* <button
+            onClick={() => setIsEditingProjectInfo(true)}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-purple-900 text-white rounded hover:bg-purple-600 transition"
+          >
+            Project Info
+          </button> */}
+          <button
+            onClick={() => setShowCeilings(!showCeilings)}
+            className={`px-3 py-1 cursor-pointer rounded hover:opacity-100 transition-all duration-200 text-white font-medium text-sm ${
+              showCeilings ? "bg-blue-600" : "bg-gray-600"
+            }`}
+          >
+            {showCeilings ? "Hide Ceilings" : "Show Ceilings"}
+          </button>
+          <button
+            onClick={() => exportScene("glb")}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-orange-900 text-white rounded hover:bg-orange-600 transition"
+            title="Export as GLB (binary format)"
+          >
+            Export GLB
+          </button>
+
+          <button
+            onClick={() => exportScene("gltf")}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-orange-800 text-white rounded hover:bg-orange-500 transition"
+            title="Export as GLTF (JSON format)"
+          >
+            Export GLTF
+          </button>
+
+          <button
+            onClick={() => exportScene("obj")}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-orange-700 text-white rounded hover:bg-orange-400 transition"
+            title="Export as OBJ (Wavefront format)"
+          >
+            Export OBJ
+          </button>
+
+          <button
+            onClick={() => exportScene("stl")}
+            style={{ padding: "5px 10px", cursor: "pointer" }}
+            className="bg-orange-600 text-white rounded hover:bg-orange-300 transition"
+            title="Export as STL (3D printing format)"
+          >
+            Export STL
+          </button>
+        </div>
+
+        <div className="fixed bottom-32 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 flex-wrap shadow-md">
+          <button
+            onClick={() => {
+              setIsFloorEditingMode(!isFloorEditingMode);
+              if (isFloorEditingMode) {
+                setSelectedFloorMaterial(null);
+              }
+            }}
+            className={`px-3 py-1 cursor-pointer rounded hover:opacity-100 transition-all duration-200 text-white font-medium text-sm ${
+              isFloorEditingMode ? "bg-green-600" : "bg-gray-600"
+            }`}
+          >
+            {isFloorEditingMode ? "Exit Floor Edit" : "Edit Floors"}
+          </button>
+
+          {isFloorEditingMode && (
+            <>
+              <h3 className="font-bold text-gray-800 w-full">
+                Floor Materials:
+              </h3>
+              {FLOOR_MATERIALS.map((material) => (
+                <button
+                  key={material.id}
+                  onClick={() => setSelectedFloorMaterial(material)}
+                  className={`px-2 py-1 cursor-pointer rounded hover:opacity-100 transition-all duration-200 text-white font-medium text-sm ${
+                    selectedFloorMaterial?.id === material.id
+                      ? "ring-2 ring-black"
+                      : "opacity-70"
+                  }`}
+                  style={{ backgroundColor: "#5d4037" }} // Brown color for floor buttons
+                  title={material.name}
+                >
+                  {material.name}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+        {/* Furniture toolbar */}
+        <div className="fixed bottom-2 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 flex-wrap shadow-md">
+          <h3 className="font-bold text-gray-800">Furniture:</h3>
+          {availableFurniture.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveTool("place");
+                setSelectedFurnitureType(item.type);
+              }}
+              className={`px-2 py-1 cursor-pointer rounded hover:opacity-100 transition-all duration-200 text-white font-medium text-sm
+        ${
+          selectedFurnitureType === item.type
+            ? "ring-2 ring-black"
+            : "opacity-70"
+        }
+        ${selectedFurniture?.type === item.type ? "opacity-100" : ""}`}
+              style={{ backgroundColor: item.color }}
+              title={item.name}
+            >
+              {item.name}
+            </button>
+          ))}
+
+          {/* Furniture controls toolbar */}
+          {selectedFurniture && (
+            <div className="fixed bottom-16 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 shadow-md">
+              <button
+                onClick={unselectFurniture}
+                className="px-3 py-1 cursor-pointer bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors duration-200 text-sm font-medium"
+              >
+                Unselect
+              </button>
+              <button
+                onClick={deleteSelectedFurniture}
+                className="px-3 py-1 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
+              >
+                Delete
+              </button>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => moveFurniture("forward")}
+                  className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                >
+                  ↑
+                </button>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => moveFurniture("left")}
+                    className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
                   >
-                    {item.type}
-                  </li>
-                ))}
-              </ul>
+                    ←
+                  </button>
+                  <button
+                    onClick={() => moveFurniture("backward")}
+                    className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    onClick={() => moveFurniture("right")}
+                    className="px-2 py-0.5 cursor-pointer bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
-      )}
 
-      {/* Project info modal */}
-      {isEditingProjectInfo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Project Information</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Project Name
-              </label>
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsEditingProjectInfo(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveProject}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save Project
-              </button>
-            </div>
+        {/* Room info panel */}
+        {selectedRoom && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 10,
+              right: 10,
+              zIndex: 100,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              padding: "10px",
+              borderRadius: "5px",
+              maxWidth: "300px",
+            }}
+          >
+            <h3 className="font-bold">{selectedRoom.name}</h3>
+            <p>
+              Dimensions: {(selectedRoom.x2 - selectedRoom.x1).toFixed(2)}m x{" "}
+              {(selectedRoom.y2 - selectedRoom.y1).toFixed(2)}m
+            </p>
+            <p>
+              Area:{" "}
+              {(
+                (selectedRoom.x2 - selectedRoom.x1) *
+                (selectedRoom.y2 - selectedRoom.y1)
+              ).toFixed(2)}
+              m²
+            </p>
+            <p>Floor: {floorMaterials[selectedRoom.name]?.name || "Default"}</p>
+            {selectedRoom.furniture && selectedRoom.furniture.length > 0 && (
+              <div>
+                <p className="font-bold mt-2">Furniture:</p>
+                <ul>
+                  {selectedRoom.furniture.map((item, i) => (
+                    <li
+                      key={i}
+                      className={
+                        selectedFurniture?.id === item.id ? "font-bold" : ""
+                      }
+                    >
+                      {item.type}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      <Canvas
-        ref={canvasRef}
-        shadows
-        camera={{ position: [centerX, 50, centerZ + 50], fov: 50 }}
-        gl={{ preserveDrawingBuffer: true }}
-      >
-        <CameraController boundaries={layout?.boundaries} mode={viewMode} />
-
-        <ambientLight intensity={0.5} />
-        <SunLight position={lightPosition} />
-
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={viewMode === "3d"}
-          target={[centerX, 0, centerZ]}
-        />
-
-        {/* Ground */}
-        <mesh
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[centerX, -0.1, centerZ]}
-          receiveShadow
-        >
-          <planeGeometry args={[width * 1.5, height * 1.5]} />
-          <meshStandardMaterial color="#f0f0f0" />
-        </mesh>
-
-        {/* Grid helper */}
-        {gridVisible && (
-          <gridHelper
-            args={[Math.max(width, height) * 1.2, 20, "#999", "#999"]}
-            position={[centerX, 0.01, centerZ]}
-          />
         )}
 
-        {/* Rooms */}
-        {rooms.map((room, index) => (
-          <RoomBox
-            key={index}
-            room={room}
-            selected={selectedRoom === room}
-            onClick={() => handleRoomClick(room)}
-            onDoubleClick={() => handleRoomDoubleClick(room)}
-            showDoors={showDoors}
-            allRooms={rooms}
-            selectedFurniture={selectedFurniture}
-            onFurnitureClick={handleFurnitureClick}
-            activeTool={activeTool}
-            selectedFurnitureType={selectedFurnitureType}
-            onFloorClick={handleFloorClick}
-            roomColors={roomColors}
+        {/* Project info modal */}
+        {isEditingProjectInfo && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-96">
+              <h2 className="text-xl font-bold mb-4">Project Information</h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setIsEditingProjectInfo(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveProject}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Save Project
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Canvas
+          shadows
+          ref={canvasRef}
+          onCreated={handleCanvasReady}
+          camera={{ position: [centerX, 50, centerZ + 50], fov: 50 }}
+          gl={{ preserveDrawingBuffer: true }}
+        >
+          <CameraController boundaries={layout?.boundaries} mode={viewMode} />
+
+          <ambientLight intensity={0.5} />
+          <SunLight position={lightPosition} />
+
+          <OrbitControls
+            enablePan={true}
+            enableZoom={true}
+            enableRotate={viewMode === "3d"}
+            target={[centerX, 0, centerZ]}
           />
-        ))}
-      </Canvas>
-    </div>
+
+          {/* Ground */}
+          <mesh
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[centerX, -0.1, centerZ]}
+            receiveShadow
+          >
+            <planeGeometry args={[width * 1.5, height * 1.5]} />
+            <meshStandardMaterial color="#f0f0f0" />
+          </mesh>
+
+          {/* Grid helper */}
+          {gridVisible && (
+            <gridHelper
+              args={[Math.max(width, height) * 1.2, 20, "#999", "#999"]}
+              position={[centerX, 0.01, centerZ]}
+            />
+          )}
+
+          {/* Rooms */}
+          {rooms.map((room, index) => (
+            <RoomBox
+              key={index}
+              room={room}
+              selected={selectedRoom === room}
+              onClick={() => handleRoomClick(room)}
+              onDoubleClick={() => handleRoomDoubleClick(room)}
+              showDoors={showDoors}
+              allRooms={rooms}
+              selectedFurniture={selectedFurniture}
+              onFurnitureClick={handleFurnitureClick}
+              activeTool={activeTool}
+              selectedFurnitureType={selectedFurnitureType}
+              onFloorClick={handleFloorClick}
+              roomColors={roomColors}
+              floorMaterials={floorMaterials}
+              showCeilings={showCeilings}
+            />
+          ))}
+        </Canvas>
+      </div>
+    </ErrorBoundary>
   );
 };
 

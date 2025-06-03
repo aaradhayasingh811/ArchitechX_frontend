@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
-    "@react-three/drei": "^10.0.8",
+    "@react-three/drei": "^10.1.2",
     "@react-three/fiber": "^9.1.2",
     "@react-three/postprocessing": "^3.0.4",
     "axios": "^1.9.0",
@@ -38,6 +38,8 @@
     "react-simple-captcha": "^9.3.1",
     "react-toastify": "^11.0.5",
     "three": "^0.176.0",
+    "three-csg-ts": "^3.2.0",
+    "three-stdlib": "^2.36.0",
     "tweakpane": "^4.0.5"
   },
   "devDependencies": {

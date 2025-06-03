@@ -327,7 +327,7 @@ const SignupForm = () => {
             </button>
           </form>
 
-          <div className="flex items-center my-6">
+          {/* <div className="flex items-center my-6">
             <div className="flex-grow h-px bg-gray-300" />
             <span className="mx-3 text-sm text-gray-500 font-medium">OR</span>
             <div className="flex-grow h-px bg-gray-300" />
@@ -343,7 +343,7 @@ const SignupForm = () => {
               className="w-5 h-5"
             />
             Sign up with Google
-          </button>
+          </button> */}
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
