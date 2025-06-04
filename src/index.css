@@ -114,7 +114,7 @@ body.chatbot-open {
 /* Add this to your global CSS */
 body {
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 canvas {

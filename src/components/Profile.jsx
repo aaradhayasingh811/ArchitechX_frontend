@@ -239,6 +239,26 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+// Reusable Loader component
+const Loader = ({ size = "md", color = "blue" }) => {
+  const sizeClasses = {
+    sm: "h-4 w-4 border-2",
+    md: "h-6 w-6 border-2",
+    lg: "h-8 w-8 border-3",
+    xl: "h-12 w-12 border-4"
+  };
+
+  const colorClasses = {
+    blue: "border-blue-500 border-t-transparent",
+    white: "border-white border-t-transparent",
+    gray: "border-gray-400 border-t-transparent"
+  };
+
+  return (
+    <div className={`animate-spin rounded-full ${sizeClasses[size]} ${colorClasses[color]}`}></div>
+  );
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -368,7 +388,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader size="xl" />
       </div>
     );
   }
@@ -465,8 +485,7 @@ const Profile = () => {
           >
             {submitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                Updating...
+                <Loader size="sm" color="white" /> Updating...
               </>
             ) : (
               "Update Profile"
@@ -480,8 +499,7 @@ const Profile = () => {
           >
             {logoutLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                Logging out...
+                <Loader size="sm" color="white" /> Logging out...
               </>
             ) : (
               <>

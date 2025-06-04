@@ -347,7 +347,7 @@ const RoomBox = ({
       <FurnitureItem
         key={i}
         type={item.type}
-        position={[item.x - x, 2, item.y - z]}
+        position={[item.x - x, 1, item.y - z]}
         rotation={[0, item.rotation || 0, 0]}
         onClick={() => onFurnitureClick(item)}
         isSelected={selectedFurniture?.id === item.id}

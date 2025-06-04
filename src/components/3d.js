@@ -10,6 +10,7 @@ import { useGLTF } from "@react-three/drei";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
+import FirstPersonControls from "./FirstPersonControls";
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -594,6 +595,8 @@ const Layout3D = ({ data }) => {
   const [isFloorEditingMode, setIsFloorEditingMode] = useState(false);
   const canvasRef = useRef();
   const paneRef = useRef();
+  const [walkMode, setWalkMode] = useState(false);
+
   const handleCanvasReady = useCallback((state) => {
     setScene(state.scene);
     setRenderer(state.gl);
@@ -1238,6 +1241,22 @@ const Layout3D = ({ data }) => {
           >
             Export STL
           </button>
+          <button
+  onClick={() => {
+    setWalkMode(!walkMode);
+    // Reset camera when exiting walk mode
+    if (walkMode && canvasRef.current) {
+      const controls = canvasRef.current.getThreeControls();
+      controls.reset();
+    }
+  }}
+  style={{ padding: "5px 10px", cursor: "pointer" }}
+  className={`${
+    walkMode ? "bg-red-500" : "bg-blue-500"
+  } text-white rounded hover:opacity-90 transition`}
+>
+  {walkMode ? "Exit Walk Mode" : "Enter Walk Mode"}
+</button>
         </div>
 
         <div className="fixed bottom-32 left-2 z-[100] bg-white/80 p-2 rounded-lg flex gap-2 flex-wrap shadow-md">
@@ -1438,17 +1457,31 @@ const Layout3D = ({ data }) => {
           camera={{ position: [centerX, 50, centerZ + 50], fov: 50 }}
           gl={{ preserveDrawingBuffer: true }}
         >
+          {walkMode ? (
+  <FirstPersonControls 
+    active={walkMode} 
+    boundaries={layout?.boundaries} 
+    rooms={layout?.rooms}
+  />
+) : (
+  <OrbitControls
+    enablePan={true}
+    enableZoom={true}
+    enableRotate={viewMode === "3d"}
+    target={[centerX, 0, centerZ]}
+  />
+)}
           <CameraController boundaries={layout?.boundaries} mode={viewMode} />
 
           <ambientLight intensity={0.5} />
           <SunLight position={lightPosition} />
 
-          <OrbitControls
+          {/* <OrbitControls
             enablePan={true}
             enableZoom={true}
             enableRotate={viewMode === "3d"}
             target={[centerX, 0, centerZ]}
-          />
+          /> */}
 
           {/* Ground */}
           <mesh
@@ -1495,3 +1528,4 @@ const Layout3D = ({ data }) => {
 };
 
 export default Layout3D;
+
