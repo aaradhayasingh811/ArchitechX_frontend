@@ -289,9 +289,8 @@ const Profile = () => {
             name: user.name || "John Doe",
             email: user.email || "example.com",
             avatar: user.avatar || null,
-            avatarPreview: user.avatar
-              ? `${import.meta.env.VITE_API_URL}/uploads/${user.avatar}`
-              : null,
+            avatarPreview: user.avatar || null,
+
           }));
         }
       } catch (error) {
