@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 
-const RECAPTCHA_SITE_KEY = "6LfWXlUrAAAAAJpb-OqSpcetOeuxvOTJQlCIuHd9";
+const RECAPTCHA_SITE_KEY = "6LcdX1UrAAAAADBJOJlAhFDKETkIGHknDsuDiT9I";
 
 const LoginForm = () => {
   const recaptchaRef = useRef();
