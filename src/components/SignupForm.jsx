@@ -64,13 +64,13 @@ const SignupForm = () => {
     setPasswordStrength(Math.min(strength, 5)); // Max strength of 5
   };
 
-  const handleCaptchaChange = (value) => {
-    setCaptchaVerified(!!value);
-    setFormData((prev) => ({
-      ...prev,
-      captchaToken: value,
-    }));
-  };
+  // const handleCaptchaChange = (value) => {
+  //   setCaptchaVerified(!!value);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     captchaToken: value,
+  //   }));
+  // };
 
   const validateForm = () => {
     const newErrors = {};
@@ -90,9 +90,9 @@ const SignupForm = () => {
       newErrors.password = "Password must be at least 8 characters with uppercase, lowercase, number, and special character";
     }
     
-    if (!captchaVerified) {
-      newErrors.captcha = "Please complete the CAPTCHA";
-    }
+    // if (!captchaVerified) {
+    //   newErrors.captcha = "Please complete the CAPTCHA";
+    // }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -297,7 +297,7 @@ const SignupForm = () => {
               </div>
             </div> */}
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <div className="flex justify-center">
                 <ReCAPTCHA
                   sitekey={RECAPTCHA_SITE_KEY}
@@ -306,7 +306,7 @@ const SignupForm = () => {
                 />
               </div>
               {errors.captcha && <p className="mt-1 text-sm text-red-600 text-center">{errors.captcha}</p>}
-            </div>
+            </div> */}
 
             <button
               type="submit"

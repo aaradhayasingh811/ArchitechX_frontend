@@ -34,18 +34,18 @@ const LoginForm = () => {
     }
   };
 
-  const handleCaptchaChange = (value) => {
-    setCaptchaVerified(!!value);
-    setFormData((prev) => ({
-      ...prev,
-      captchaToken: value,
-    }));
+  // const handleCaptchaChange = (value) => {
+  //   setCaptchaVerified(!!value);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     captchaToken: value,
+  //   }));
 
-    // Clear captcha error if exists
-    if (errors.captcha) {
-      setErrors((prev) => ({ ...prev, captcha: "" }));
-    }
-  };
+  //   // Clear captcha error if exists
+  //   if (errors.captcha) {
+  //     setErrors((prev) => ({ ...prev, captcha: "" }));
+  //   }
+  // };
 
   const validateForm = () => {
     const newErrors = {};
@@ -58,9 +58,9 @@ const LoginForm = () => {
       newErrors.password = "Password is required";
     }
 
-    if (!captchaVerified) {
-      newErrors.captcha = "Please complete the CAPTCHA";
-    }
+    // if (!captchaVerified) {
+    //   newErrors.captcha = "Please complete the CAPTCHA";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -275,7 +275,7 @@ const LoginForm = () => {
               </div>
             </div>
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <div className="flex justify-center">
                 <ReCAPTCHA
                   sitekey={RECAPTCHA_SITE_KEY}
@@ -288,7 +288,7 @@ const LoginForm = () => {
                   {errors.captcha}
                 </p>
               )}
-            </div>
+            </div> */}
 
             <button
               type="submit"
